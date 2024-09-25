@@ -1,25 +1,43 @@
 <template>
-  <view class="content">
+  <view v-for="item in list" :key="item.oddNumbers">
     <uni-card
-      title="基础卡片"
-      sub-title="副标题"
-      extra="额外信息"
-      :thumbnail="avatar"
+      :title="item.goods"
+      :sub-title="item.platform"
+      :extra="item.createTime"
       @click="onClick"
     >
-      <text class="uni-body"
-        >这是一个带头像和双标题的基础卡片，此示例展示了一个完整的卡片。</text
-      >
+      <view>单号：{{ item.oddNumbers }}</view>
+      <view>分仓：{{ item.warehouse }}</view>
+      <view slot="actions">
+        <button class="mini-btn" type="primary" size="mini">验证</button>
+      </view>
     </uni-card>
   </view>
 </template>
 
 <script setup lang="ts">
-const avatar =
-  "https://qiniu-web-assets.dcloud.net.cn/unidoc/zh/unicloudlogo.png"
+import { ref } from "vue"
+
+interface Inspection {
+  oddNumbers?: string
+  platform?: string
+  goods?: string
+  createTime?: string
+  warehouse?: string
+}
+
+const list = ref<Inspection[]>([
+  {
+    oddNumbers: "111111111111",
+    platform: "shopify",
+    goods: "111",
+    createTime: "2024-09-25",
+    warehouse: "111",
+  },
+])
 
 function onClick(e: any) {
-  console.log(e)
+  console.log("e", e)
 }
 </script>
 
@@ -29,24 +47,5 @@ function onClick(e: any) {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-}
-
-.logo {
-  height: 200rpx;
-  width: 200rpx;
-  margin-top: 200rpx;
-  margin-left: auto;
-  margin-right: auto;
-  margin-bottom: 50rpx;
-}
-
-.text-area {
-  display: flex;
-  justify-content: center;
-}
-
-.title {
-  font-size: 36rpx;
-  color: #8f8f94;
 }
 </style>
