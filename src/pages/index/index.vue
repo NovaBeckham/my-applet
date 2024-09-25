@@ -1,15 +1,26 @@
 <template>
   <view class="content">
-    <image class="logo" src="/static/logo.png" />
-    <view class="text-area">
-      <text class="title">{{ title }}</text>
-    </view>
+    <uni-card
+      title="基础卡片"
+      sub-title="副标题"
+      extra="额外信息"
+      :thumbnail="avatar"
+      @click="onClick"
+    >
+      <text class="uni-body"
+        >这是一个带头像和双标题的基础卡片，此示例展示了一个完整的卡片。</text
+      >
+    </uni-card>
   </view>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
-const title = ref('Hello')
+const avatar =
+  "https://qiniu-web-assets.dcloud.net.cn/unidoc/zh/unicloudlogo.png"
+
+function onClick(e: any) {
+  console.log(e)
+}
 </script>
 
 <style>
