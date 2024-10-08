@@ -9,7 +9,13 @@
 		{
 			"path": "pages/index/index",
 			"style": {
-				"navigationBarTitleText": "uni-app"
+				"navigationBarTitleText": "验货列表"
+			}
+		},
+		{
+			"path": "pages/box/index",
+			"style": {
+				"navigationBarTitleText": "箱号列表"
 			}
 		}
 	],

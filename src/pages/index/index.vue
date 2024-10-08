@@ -4,12 +4,11 @@
       :title="item.goods"
       :sub-title="item.platform"
       :extra="item.createTime"
-      @click="onClick"
+      @click="onClick(item)"
     >
-      <view>单号：{{ item.oddNumbers }}</view>
-      <view>分仓：{{ item.warehouse }}</view>
-      <view slot="actions">
-        <button class="mini-btn" type="primary" size="mini">验证</button>
+      <view>
+        <view>单号：{{ item.oddNumbers }}</view>
+        <view>分仓：{{ item.warehouse }}</view>
       </view>
     </uni-card>
   </view>
@@ -24,28 +23,76 @@ interface Inspection {
   goods?: string
   createTime?: string
   warehouse?: string
+  boxList?: Array<{ boxNo?: string; product?: string }>
 }
 
 const list = ref<Inspection[]>([
   {
-    oddNumbers: "111111111111",
+    oddNumbers: "单号111111111111",
     platform: "shopify",
-    goods: "111",
+    goods: "商品111",
     createTime: "2024-09-25",
-    warehouse: "111",
+    warehouse: "分仓111",
+    boxList: [
+      { boxNo: "1111", product: "1111" },
+      { boxNo: "2222", product: "2222" },
+      { boxNo: "3333", product: "3333" },
+      { boxNo: "4444", product: "4444" },
+    ],
+  },
+  {
+    oddNumbers: "单号222222222222",
+    platform: "shopify",
+    goods: "商品111",
+    createTime: "2024-09-25",
+    warehouse: "分仓111",
+    boxList: [
+      { boxNo: "1111", product: "1111" },
+      { boxNo: "2222", product: "2222" },
+      { boxNo: "3333", product: "3333" },
+      { boxNo: "4444", product: "4444" },
+    ],
+  },
+  {
+    oddNumbers: "单号333333333333",
+    platform: "shopify",
+    goods: "商品111",
+    createTime: "2024-09-25",
+    warehouse: "分仓111",
+    boxList: [
+      { boxNo: "1111", product: "1111" },
+      { boxNo: "2222", product: "2222" },
+      { boxNo: "3333", product: "3333" },
+      { boxNo: "4444", product: "4444" },
+    ],
+  },
+  {
+    oddNumbers: "单号444444444444",
+    platform: "shopify",
+    goods: "商品111",
+    createTime: "2024-09-25",
+    warehouse: "分仓111",
+    boxList: [
+      { boxNo: "1111", product: "1111" },
+      { boxNo: "2222", product: "2222" },
+      { boxNo: "3333", product: "3333" },
+      { boxNo: "4444", product: "4444" },
+    ],
   },
 ])
 
-function onClick(e: any) {
-  console.log("e", e)
+function onClick(value: Inspection) {
+  console.log("value", value.createTime)
+  uni.navigateTo({
+    url: "/pages/box/index",
+  })
 }
 </script>
 
 <style>
 .content {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: space-between;
 }
 </style>
