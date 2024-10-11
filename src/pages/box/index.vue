@@ -8,7 +8,7 @@
       <view class="box-item">
         <view> 箱号：{{ item.boxNo }} </view>
         <view>
-          <button type="primary" size="mini" @click="check">验证</button>
+          <button type="primary" size="mini" @click="check(item)">验证</button>
         </view>
       </view>
     </uni-card>
@@ -38,10 +38,18 @@
 <script setup lang="ts">
 import { ref } from "vue"
 
+interface BoxItem {
+  boxNo?: string
+  product?: string
+  sku?: string
+  wareCode?: string
+}
+
 const scanFunctionIsUseable = ref(false)
 const isScanAllowed = ref(false)
 const scanCount = ref(0)
 const scanCodeList = ref<string[]>([])
+const targetBox = ref<BoxItem>({})
 const maxScanCount = 3
 let scanTimeoutId: null | number = null
 
@@ -52,24 +60,83 @@ const data = ref({
   createTime: "2024-09-25",
   warehouse: "分仓111",
   boxList: [
-    { boxNo: "1111", product: "1111" },
-    { boxNo: "2222", product: "2222" },
-    { boxNo: "3333", product: "3333" },
-    { boxNo: "4444", product: "4444" },
+    { boxNo: "1111", product: "1111", sku: "1111", wareCode: "1111" },
+    { boxNo: "2222", product: "2222", sku: "2222", wareCode: "2222" },
+    { boxNo: "3333", product: "3333", sku: "3333", wareCode: "3333" },
+    { boxNo: "4444", product: "4444", sku: "4444", wareCode: "4444" },
   ],
 })
 
-const check = () => {
+const check = (value: BoxItem) => {
   scanFunctionIsUseable.value = true
   isScanAllowed.value = true
+  targetBox.value = value
   scanCodeList.value = []
   scanCount.value = 0
+}
+
+/** 判断箱号是否相同 */
+const judgeBoxNo = () => {
+  const index = scanCodeList.value.findIndex(
+    (item) => targetBox.value.boxNo === item
+  )
+  if (index > -1) {
+    scanCodeList.value.splice(index, 1)
+    return true
+  }
+  return false
+}
+
+/** 判断SKU是否相同 */
+const judgeSku = () => {
+  const index = scanCodeList.value.findIndex(
+    (item) => targetBox.value.sku === item
+  )
+  if (index > -1) {
+    scanCodeList.value.splice(index, 1)
+    return true
+  }
+  return false
+}
+
+/** 判断wareCode是否相同 */
+const judgeWareCode = () => {
+  const index = scanCodeList.value.findIndex(
+    (item) => targetBox.value.wareCode === item
+  )
+  if (index > -1) {
+    scanCodeList.value.splice(index, 1)
+    return true
+  }
+  return false
+}
+
+const checkTarget = () => {
+  const hasBoxNo = judgeBoxNo()
+  const hasSku = judgeSku()
+  const hasWareCode = judgeWareCode()
+  if (hasBoxNo && hasSku && hasWareCode) {
+    uni.showModal({
+      title: "扫码成功",
+      icon: "success",
+      content: "二维码已成功识别",
+      showCancel: false, // 不显示取消按钮
+      confirmText: "好的", // 确认按钮的文字
+    })
+  } else {
+    uni.showModal({
+      title: "扫码失败",
+      icon: "error",
+      content: "二维码已成功识别",
+      showCancel: false, // 不显示取消按钮
+      confirmText: "好的", // 确认按钮的文字
+    })
+  }
 }
 
 const handleScanCode = (e: any) => {
   if (isScanAllowed.value && scanCount.value < maxScanCount) {
     scanCount.value++
-    console.log("扫码结果：", e.detail.result)
     scanCodeList.value.push(e.detail.result)
     // 处理扫码结果
     // ...
@@ -83,11 +150,11 @@ const handleScanCode = (e: any) => {
       isScanAllowed.value = true
     }, 1000) // 1秒后再次启用扫码功能
     if (scanCount.value >= maxScanCount) {
-      console.log("已达到最大扫码次数")
       // 达到最大扫码次数后不再启动扫码功能
       clearTimeout(scanTimeoutId)
       isScanAllowed.value = false
       scanFunctionIsUseable.value = false
+      checkTarget()
     }
   } else {
     // 达到最大扫码次数，可以在这里处理后续逻辑

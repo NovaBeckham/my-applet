@@ -82,7 +82,6 @@ const list = ref<Inspection[]>([
 ])
 
 function onClick(value: Inspection) {
-  console.log("value", value.createTime)
   uni.navigateTo({
     url: "/pages/box/index",
   })
