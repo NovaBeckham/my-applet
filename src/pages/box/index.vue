@@ -119,7 +119,7 @@ const checkTarget = () => {
     uni.showModal({
       title: "扫码成功",
       icon: "success",
-      content: "二维码已成功识别",
+      content: "验证成功",
       showCancel: false, // 不显示取消按钮
       confirmText: "好的", // 确认按钮的文字
     })
@@ -127,7 +127,7 @@ const checkTarget = () => {
     uni.showModal({
       title: "扫码失败",
       icon: "error",
-      content: "二维码已成功识别",
+      content: "验证失败",
       showCancel: false, // 不显示取消按钮
       confirmText: "好的", // 确认按钮的文字
     })
