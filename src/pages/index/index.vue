@@ -1,97 +1,34 @@
 <template>
-  <view v-for="item in list" :key="item.oddNumbers">
-    <uni-card
-      :title="item.goods"
-      :sub-title="item.platform"
-      :extra="item.createTime"
-      @click="onClick(item)"
-    >
-      <view>
-        <view>单号：{{ item.oddNumbers }}</view>
-        <view>分仓：{{ item.warehouse }}</view>
-      </view>
-    </uni-card>
+  <view class="content">
+    <view class="item" @click="toWait"> 思肯 - 无线面罩 </view>
+    <view class="item"> 尖超 - X3 </view>
+    <view class="item"> 初见未来 - XE </view>
+    <view class="item"> 启哲 - N5Lite </view>
   </view>
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue"
 
-interface Inspection {
-  oddNumbers?: string
-  platform?: string
-  goods?: string
-  createTime?: string
-  warehouse?: string
-  boxList?: Array<{ boxNo?: string; product?: string }>
-}
-
-const list = ref<Inspection[]>([
-  {
-    oddNumbers: "单号111111111111",
-    platform: "shopify",
-    goods: "商品111",
-    createTime: "2024-09-25",
-    warehouse: "分仓111",
-    boxList: [
-      { boxNo: "1111", product: "1111" },
-      { boxNo: "2222", product: "2222" },
-      { boxNo: "3333", product: "3333" },
-      { boxNo: "4444", product: "4444" },
-    ],
-  },
-  {
-    oddNumbers: "单号222222222222",
-    platform: "shopify",
-    goods: "商品111",
-    createTime: "2024-09-25",
-    warehouse: "分仓111",
-    boxList: [
-      { boxNo: "1111", product: "1111" },
-      { boxNo: "2222", product: "2222" },
-      { boxNo: "3333", product: "3333" },
-      { boxNo: "4444", product: "4444" },
-    ],
-  },
-  {
-    oddNumbers: "单号333333333333",
-    platform: "shopify",
-    goods: "商品111",
-    createTime: "2024-09-25",
-    warehouse: "分仓111",
-    boxList: [
-      { boxNo: "1111", product: "1111" },
-      { boxNo: "2222", product: "2222" },
-      { boxNo: "3333", product: "3333" },
-      { boxNo: "4444", product: "4444" },
-    ],
-  },
-  {
-    oddNumbers: "单号444444444444",
-    platform: "shopify",
-    goods: "商品111",
-    createTime: "2024-09-25",
-    warehouse: "分仓111",
-    boxList: [
-      { boxNo: "1111", product: "1111" },
-      { boxNo: "2222", product: "2222" },
-      { boxNo: "3333", product: "3333" },
-      { boxNo: "4444", product: "4444" },
-    ],
-  },
-])
-
-function onClick(value: Inspection) {
-  uni.navigateTo({
-    url: "/pages/box/index",
+const toWait = () => {
+  uni.switchTab({
+    url: "/pages/wait/index",
   })
 }
+
 </script>
 
 <style>
 .content {
   display: flex;
+  flex-direction: column;
+  justify-content: center;
   align-items: center;
-  justify-content: space-between;
+}
+.item {
+  width: 80%;
+  background: #fff;
+  padding: 20rpx;
+  border: 1rpx solid rgba(33, 84, 118, 1);
+  margin: 20rpx 0;
 }
 </style>

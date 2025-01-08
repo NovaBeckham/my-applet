@@ -1,28 +1,67 @@
 {
-	"easycom": {
-		"autoscan": true,
-		"custom": {
-			"^uni-(.*)": "@dcloudio/uni-ui/lib/uni-$1/uni-$1.vue"
-		}
-	},
-	"pages": [
+  "easycom": {
+    "autoscan": true,
+    "custom": {
+      "^uni-(.*)": "@dcloudio/uni-ui/lib/uni-$1/uni-$1.vue"
+    }
+  },
+  "pages": [
+    {
+      "path": "pages/index/index",
+      "style": {
+        "navigationBarTitleText": "验货小程序"
+      }
+    },
+    {
+      "path": "pages/box/index",
+      "style": {
+        "navigationBarTitleText": "扫码验证"
+      }
+    },
 		{
-			"path": "pages/index/index",
-			"style": {
-				"navigationBarTitleText": "验货列表"
-			}
-		},
+      "path": "pages/wait/index",
+      "style": {
+        "navigationBarTitleText": "待验",
+        "backgroundColor": "#3EFEFE"
+      }
+    },
 		{
-			"path": "pages/box/index",
-			"style": {
-				"navigationBarTitleText": "箱号列表"
-			}
-		}
-	],
-	"globalStyle": {
-		"navigationBarTextStyle": "black",
-		"navigationBarTitleText": "uni-app",
-		"navigationBarBackgroundColor": "#F8F8F8",
-		"backgroundColor": "#F8F8F8"
-	}
+      "path": "pages/already/index",
+      "style": {
+        "navigationBarTitleText": "已验"
+      }
+    }
+  ],
+  "globalStyle": {
+    "navigationBarTextStyle": "black",
+    "navigationBarTitleText": "uni-app",
+    "navigationBarBackgroundColor": "#F8F8F8",
+    "backgroundColor": "#F8F8F8"
+  },
+  "tabBar": {
+		"color": "#000000",
+    "selectedColor": "#031890FF",
+    "borderStyle": "black",
+    "backgroundColor": "#ffffff",
+    "list": [
+      {
+        "pagePath": "pages/index/index",
+				"iconPath": "static/home.png",
+				"selectedIconPath": "static/home-active.png",
+        "text": "首页"
+      },
+      {
+        "pagePath": "pages/wait/index",
+				"iconPath": "static/comment.png",
+				"selectedIconPath": "static/comment-active.png",
+        "text": "待验"
+      },
+			{
+        "pagePath": "pages/already/index",
+				"iconPath": "static/comment.png",
+				"selectedIconPath": "static/comment-active.png",
+        "text": "已验"
+      }
+    ]
+  }
 }
