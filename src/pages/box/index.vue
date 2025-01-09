@@ -24,6 +24,7 @@
               :clearable="false"
               v-model="item.value"
               type="number"
+              disabled
             ></uni-easyinput
           ></uni-col>
         </uni-row>
@@ -32,11 +33,20 @@
             ><text>SN：{{ item.snNo }}</text></uni-col
           >
           <uni-col :span="2" class="col-checkbox"
-            ><radio :checked="item.check" color="#2da641"
-          /></uni-col>
+            ><uni-icons
+              type="calendar-filled"
+              size="20"
+              color="#2da641"
+              v-if="item.check"
+            ></uni-icons
+            ><uni-icons type="calendar" size="20" v-else></uni-icons
+          ></uni-col>
         </uni-row>
       </view>
     </uni-card>
+  </view>
+  <view>
+    <button class="fab" @click="onFabClick">完成</button>
   </view>
 </template>
 
@@ -82,6 +92,13 @@ const check = (value: BoxItem) => {
   targetBox.value = value
   scanCodeList.value = []
   scanCount.value = 0
+}
+
+const onFabClick = () => {
+  if (scanFunctionIsUseable.value) {
+    isScanAllowed.value = false
+    scanFunctionIsUseable.value = false
+  }
 }
 
 /** 判断箱号是否相同 */
@@ -194,7 +211,7 @@ const handleError = () => {
   flex-direction: column;
   align-items: center;
   justify-content: space-between;
-  height: 100vh;
+  height: 50vh;
 }
 
 .camera {
@@ -220,5 +237,28 @@ const handleError = () => {
     align-items: center;
     justify-content: start;
   }
+  .uni-row:last-child {
+    margin-top: 20rpx;
+  }
+}
+.fab {
+  position: fixed; /* 固定定位 */
+  bottom: 60rpx; /* 距离底部20px */
+  left: 50%; /* 水平居中 */
+  transform: translateX(-50%); /* 使按钮向左移动其自身宽度的一半 */
+  width: 60%; /* 按钮宽度 */
+  height: 70rpx; /* 按钮高度 */
+  border-radius: 15rpx; /* 圆形按钮 */
+  background-color: #6200ea; /* 按钮背景色 */
+  color: white; /* 按钮文字颜色 */
+  border: none; /* 去掉边框 */
+  box-shadow: 0 8rpx 18rpx rgba(0, 0, 0, 0.2); /* 阴影效果 */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.fab:hover {
+  background-color: #3700b3; /* 悬停时的背景色 */
 }
 </style>

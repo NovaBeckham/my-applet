@@ -1,30 +1,13 @@
 <template>
-  <view v-for="item in list" :key="item.oddNumbers">
-    <uni-card
-      :title="item.goods"
-      :sub-title="item.platform"
-      :extra="item.createTime"
-      @click="onClick(item)"
-    >
-      <view>
-        <view>单号：{{ item.oddNumbers }}</view>
-        <view>分仓：{{ item.warehouse }}</view>
-      </view>
-    </uni-card>
+  <view v-for="item in list" :key="item.oddNumbers" @click="onClick">
+    <InspectionCom :item="item" status="already" />
   </view>
 </template>
 
 <script setup lang="ts">
 import { ref } from "vue"
-
-interface Inspection {
-  oddNumbers?: string
-  platform?: string
-  goods?: string
-  createTime?: string
-  warehouse?: string
-  boxList?: Array<{ boxNo?: string; product?: string }>
-}
+import type { Inspection } from "@/interface"
+import InspectionCom from "@/components/Inspection/index.vue"
 
 const list = ref<Inspection[]>([
   {
@@ -34,10 +17,10 @@ const list = ref<Inspection[]>([
     createTime: "2024-09-25",
     warehouse: "分仓111",
     boxList: [
-      { boxNo: "1111", product: "1111" },
-      { boxNo: "2222", product: "2222" },
-      { boxNo: "3333", product: "3333" },
-      { boxNo: "4444", product: "4444" },
+      { boxNo: "1111", skuNo: "1111", snNo: "1111" },
+      { boxNo: "2222", skuNo: "2222", snNo: "2222" },
+      { boxNo: "3333", skuNo: "3333", snNo: "3333" },
+      { boxNo: "4444", skuNo: "4444", snNo: "4444" },
     ],
   },
   {
@@ -47,10 +30,10 @@ const list = ref<Inspection[]>([
     createTime: "2024-09-25",
     warehouse: "分仓111",
     boxList: [
-      { boxNo: "1111", product: "1111" },
-      { boxNo: "2222", product: "2222" },
-      { boxNo: "3333", product: "3333" },
-      { boxNo: "4444", product: "4444" },
+      { boxNo: "1111", skuNo: "1111", snNo: "1111" },
+      { boxNo: "2222", skuNo: "2222", snNo: "2222" },
+      { boxNo: "3333", skuNo: "3333", snNo: "3333" },
+      { boxNo: "4444", skuNo: "4444", snNo: "4444" },
     ],
   },
   {
@@ -60,10 +43,10 @@ const list = ref<Inspection[]>([
     createTime: "2024-09-25",
     warehouse: "分仓111",
     boxList: [
-      { boxNo: "1111", product: "1111" },
-      { boxNo: "2222", product: "2222" },
-      { boxNo: "3333", product: "3333" },
-      { boxNo: "4444", product: "4444" },
+      { boxNo: "1111", skuNo: "1111", snNo: "1111" },
+      { boxNo: "2222", skuNo: "2222", snNo: "2222" },
+      { boxNo: "3333", skuNo: "3333", snNo: "3333" },
+      { boxNo: "4444", skuNo: "4444", snNo: "4444" },
     ],
   },
   {
@@ -73,25 +56,24 @@ const list = ref<Inspection[]>([
     createTime: "2024-09-25",
     warehouse: "分仓111",
     boxList: [
-      { boxNo: "1111", product: "1111" },
-      { boxNo: "2222", product: "2222" },
-      { boxNo: "3333", product: "3333" },
-      { boxNo: "4444", product: "4444" },
+      { boxNo: "1111", skuNo: "1111", snNo: "1111" },
+      { boxNo: "2222", skuNo: "2222", snNo: "2222" },
+      { boxNo: "3333", skuNo: "3333", snNo: "3333" },
+      { boxNo: "4444", skuNo: "4444", snNo: "4444" },
     ],
   },
 ])
 
 function onClick(value: Inspection) {
+  console.log("value", value)
   uni.navigateTo({
     url: "/pages/box/index",
   })
 }
 </script>
 
-<style>
-.content {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+<style lang="scss">
+page {
+  background-color: rgba(239, 239, 239, 1);
 }
 </style>
