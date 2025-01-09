@@ -1,5 +1,8 @@
 <template>
-  <view v-if="scanFunctionIsUseable" class="camera-container">
+  <view
+    v-if="state.status === 'wait' && boxMap.size > 0"
+    class="camera-container"
+  >
     <camera
       mode="scanCode"
       device-position="back"
@@ -9,20 +12,20 @@
       class="camera"
     />
   </view>
-  <view v-for="item in data.boxList" :key="item.boxNo" @click="check(item)">
+  <view v-for="item in boxMap" :key="item[0]">
     <uni-card>
       <view class="uni-item-row">
         <uni-row>
           <uni-col :span="10"
-            ><text>箱号：{{ item.boxNo }}</text></uni-col
+            ><text>箱号：{{ item[0] }}</text></uni-col
           >
           <uni-col :span="10"
-            ><text>sku：{{ item.skuNo }}</text></uni-col
+            ><text>sku：{{ item[1].skuNo }}</text></uni-col
           >
           <uni-col :span="4"
             ><uni-easyinput
               :clearable="false"
-              v-model="item.value"
+              v-model="item[1].value"
               type="number"
               disabled
             ></uni-easyinput
@@ -30,14 +33,14 @@
         </uni-row>
         <uni-row>
           <uni-col :span="22"
-            ><text>SN：{{ item.snNo }}</text></uni-col
+            ><text>SN：{{ item[1].snNo }}</text></uni-col
           >
           <uni-col :span="2" class="col-checkbox"
             ><uni-icons
               type="calendar-filled"
               size="20"
               color="#2da641"
-              v-if="item.check"
+              v-if="item[1].value && item[1].value > 0"
             ></uni-icons
             ><uni-icons type="calendar" size="20" v-else></uni-icons
           ></uni-col>
@@ -51,124 +54,180 @@
 </template>
 
 <script setup lang="ts">
+import { onLoad, onUnload } from "@dcloudio/uni-app"
 import { ref } from "vue"
+import { add, clone, isEmpty } from "ramda"
 
 interface BoxItem {
   boxNo?: string
   skuNo?: string
   snNo?: string
   value?: number
-  check?: boolean
+  boxNoCheck?: number
+  skuNoCheck?: number
+  snNoCheck?: number
 }
 
-const scanFunctionIsUseable = ref(false)
-const isScanAllowed = ref(false)
-const scanCount = ref(0)
-const scanCodeList = ref<string[]>([])
-const targetBox = ref<BoxItem>({})
-const maxScanCount = 3
+interface QueryOptions {
+  status?: "wait" | "already"
+  oddNumbers?: string
+  platform?: string
+  goods?: string
+  warehouse?: string
+}
+
+const isScanAllowed = ref(true)
+const state = ref<QueryOptions>({})
+const boxMap = ref<Map<string, BoxItem>>(new Map())
+const targetBox = ref("")
+const result = ref("")
+const showModal = ref(false)
 let scanTimeoutId: null | number = null
 
-const data = ref({
-  oddNumbers: "单号111111111111",
-  platform: "shopify",
-  goods: "商品111",
-  createTime: "2024-09-25",
-  warehouse: "分仓111",
-  boxList: [
-    { boxNo: "1111", skuNo: "111111111", snNo: "1111", value: 0, check: true },
-    { boxNo: "2222", skuNo: "222222222", snNo: "2222", value: 0, check: false },
-    { boxNo: "3333", skuNo: "333333333", snNo: "3333", value: 0, check: false },
-    { boxNo: "4444", skuNo: "444444444", snNo: "4444", value: 0, check: false },
-  ],
+onLoad((options?: QueryOptions) => {
+  if (options) {
+    state.value = options
+    const boxList = [
+      {
+        boxNo: "1111",
+        skuNo: "111111111",
+        snNo: "1111",
+        value: 1,
+        boxNoCheck: 1,
+        skuNoCheck: 1,
+        snNoCheck: 1,
+      },
+      {
+        boxNo: "6900966577117",
+        skuNo: "6973939344870",
+        snNo: "6922266450365",
+        value: 0,
+        boxNoCheck: 0,
+        skuNoCheck: 0,
+        snNoCheck: 0,
+      },
+      {
+        boxNo: "3333",
+        skuNo: "333333333",
+        snNo: "3333",
+        value: 0,
+        boxNoCheck: 0,
+        skuNoCheck: 0,
+        snNoCheck: 0,
+      },
+      {
+        boxNo: "4444",
+        skuNo: "444444444",
+        snNo: "4444",
+        value: 0,
+        boxNoCheck: 0,
+        skuNoCheck: 0,
+        snNoCheck: 0,
+      },
+    ]
+    const listMap: Map<string, BoxItem> = new Map()
+    boxList.forEach((item) => {
+      listMap.set(item.boxNo ?? "", clone(item))
+    })
+    boxMap.value = listMap
+    // listMap.clear()
+  }
 })
 
-const check = (value: BoxItem) => {
-  if (value.check) {
-    return
-  }
-  scanFunctionIsUseable.value = true
-  isScanAllowed.value = true
-  targetBox.value = value
-  scanCodeList.value = []
-  scanCount.value = 0
-}
+onUnload(() => {
+  console.log("离开")
+})
 
 const onFabClick = () => {
-  if (scanFunctionIsUseable.value) {
-    isScanAllowed.value = false
-    scanFunctionIsUseable.value = false
+  const item = boxMap.value.get("2222")
+  if (item) {
+    item.boxNoCheck = add(item.boxNoCheck ?? 0, 1)
+    item.skuNoCheck = add(item.skuNoCheck ?? 0, 1)
+    item.snNoCheck = add(item.snNoCheck ?? 0, 1)
+    item.value = item.boxNoCheck
   }
-}
-
-/** 判断箱号是否相同 */
-const judgeBoxNo = () => {
-  const index = scanCodeList.value.findIndex(
-    (item) => targetBox.value.boxNo === item
-  )
-  if (index > -1) {
-    scanCodeList.value.splice(index, 1)
-    return true
-  }
-  return false
-}
-
-/** 判断SKU是否相同 */
-const judgeSku = () => {
-  const index = scanCodeList.value.findIndex(
-    (item) => targetBox.value.skuNo === item
-  )
-  if (index > -1) {
-    scanCodeList.value.splice(index, 1)
-    return true
-  }
-  return false
-}
-
-/** 判断wareCode是否相同 */
-const judgeWareCode = () => {
-  const index = scanCodeList.value.findIndex(
-    (item) => targetBox.value.snNo === item
-  )
-  if (index > -1) {
-    scanCodeList.value.splice(index, 1)
-    return true
-  }
-  return false
 }
 
 const checkTarget = () => {
-  const hasBoxNo = judgeBoxNo()
-  const hasSku = judgeSku()
-  const hasWareCode = judgeWareCode()
-  if (hasBoxNo && hasSku && hasWareCode) {
-    uni.showModal({
-      title: "扫码成功",
-      icon: "success",
-      content: "验证成功",
-      showCancel: false, // 不显示取消按钮
-      confirmText: "好的", // 确认按钮的文字
-    })
-    data.value.boxList.forEach((val) => {
-      if (val.boxNo === targetBox.value.boxNo) {
-        val.check = true
-      }
-    })
+  const boxItem = boxMap.value.get(result.value)
+  if (boxItem) {
+    if (isEmpty(targetBox.value) || targetBox.value !== result.value) {
+      targetBox.value = result.value
+      boxItem.boxNoCheck = add(boxItem.boxNoCheck ?? 0, 1)
+    } else {
+      showModal.value = true
+      uni.showModal({
+        title: "提示",
+        icon: "error",
+        content: "扫码重复",
+        showCancel: false, // 不显示取消按钮
+        confirmText: "好的", // 确认按钮的文字
+        success: (result) => {
+          if (result.confirm) {
+            showModal.value = false
+          }
+        },
+      })
+    }
   } else {
-    uni.showModal({
-      title: "扫码失败",
-      icon: "error",
-      content: "验证失败",
-      showCancel: false, // 不显示取消按钮
-      confirmText: "好的", // 确认按钮的文字
-    })
+    if (isEmpty(targetBox.value)) {
+      showModal.value = true
+      uni.showModal({
+        title: "错误",
+        icon: "error",
+        content: "请先扫箱号",
+        showCancel: false,
+        confirmText: "好的",
+        success: (result) => {
+          if (result.confirm) {
+            showModal.value = false
+          }
+        },
+      })
+    } else {
+      const item = boxMap.value.get(targetBox.value)
+      if (item) {
+        if (item.snNo !== result.value && item.skuNo !== result.value) {
+          showModal.value = true
+          uni.showModal({
+            title: "错误",
+            icon: "error",
+            content: `箱号 ${targetBox.value} 内容不匹配`,
+            showCancel: false,
+            confirmText: "好的",
+            success: (result) => {
+              if (result.confirm) {
+                showModal.value = false
+              }
+            },
+          })
+          return
+        }
+        // 和SKU匹配
+        if (item.skuNo === result.value) {
+          item.skuNoCheck = add(item.skuNoCheck ?? 0, 1)
+        }
+        // 和SN匹配
+        if (item.snNo === result.value) {
+          item.snNoCheck = add(item.snNoCheck ?? 0, 1)
+        }
+        if (
+          item.boxNoCheck === item.skuNoCheck &&
+          item.boxNoCheck === item.snNoCheck &&
+          item.boxNoCheck !== item.value
+        ) {
+          item.value = item.boxNoCheck
+        }
+      }
+    }
   }
 }
 
 const handleScanCode = (e: any) => {
-  if (isScanAllowed.value && scanCount.value < maxScanCount) {
-    scanCount.value++
-    scanCodeList.value.push(e.detail.result)
+  if (isScanAllowed.value && !showModal.value) {
+    console.log("result", e.detail.result)
+    result.value = e.detail.result
+    checkTarget()
     // 处理扫码结果
     // ...
 
@@ -179,17 +238,8 @@ const handleScanCode = (e: any) => {
     }
     scanTimeoutId = setTimeout(() => {
       isScanAllowed.value = true
-    }, 1000) // 1秒后再次启用扫码功能
-    if (scanCount.value >= maxScanCount) {
-      // 达到最大扫码次数后不再启动扫码功能
-      clearTimeout(scanTimeoutId)
-      isScanAllowed.value = false
-      scanFunctionIsUseable.value = false
-      checkTarget()
-    }
-  } else {
-    // 达到最大扫码次数，可以在这里处理后续逻辑
-    console.log("扫码功能当前不可用")
+    }, 2000) // 2秒后再次启用扫码功能
+    // if
   }
 }
 
