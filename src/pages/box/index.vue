@@ -11,52 +11,47 @@
   </view>
   <view v-for="item in boxMap" :key="item[0]">
     <uni-card>
-      <view class="uni-item-row">
-        <uni-row>
-          <uni-col :span="10"
-            ><uni-icons
+      <view class="item-container">
+        <view class="item-content">
+          <view class="content huodai">
+            <uni-icons
               custom-prefix="iconfont"
               type="icon-huodai"
               size="20"
-            ></uni-icons
-            ><text>{{ item[0] }}</text></uni-col
-          >
-          <uni-col :span="10"
-            ><uni-icons
+            ></uni-icons>
+            <text class="content-text">{{ item[0] }}</text>
+          </view>
+          <view class="content sku">
+            <uni-icons
               custom-prefix="iconfont"
               type="icon-sku"
               size="20"
-            ></uni-icons
-            ><text>{{ item[1].skuNo }}</text></uni-col
-          >
-          <uni-col :span="4"
-            ><uni-easyinput
-              :clearable="false"
-              v-model="item[1].value"
-              type="number"
-              disabled
-            ></uni-easyinput
-          ></uni-col>
-        </uni-row>
-        <uni-row>
-          <uni-col :span="22"
-            ><uni-icons
+            ></uni-icons>
+            <text class="content-text">{{ item[1].skuNo }}</text>
+          </view>
+          <view class="content easyinput">
+            <uni-tag :text="`x ${item[1].value}`" type="primary" />
+          </view>
+        </view>
+        <view>
+          <view class="content">
+            <uni-icons
               custom-prefix="iconfont"
               type="icon-xianghao"
               size="20"
-            ></uni-icons
-            ><text>{{ item[1].snNo }}</text></uni-col
-          >
-          <uni-col :span="2" class="col-checkbox" v-if="isWait"
-            ><uni-icons
+            ></uni-icons>
+            <text class="content-text">{{ item[1].snNo }}</text>
+          </view>
+          <view class="content" v-if="isWait">
+            <uni-icons
               type="calendar-filled"
               size="20"
               color="#2da641"
               v-if="item[1].value && item[1].value > 0"
             ></uni-icons
-            ><uni-icons type="calendar" size="20" v-else></uni-icons
-          ></uni-col>
-        </uni-row>
+            ><uni-icons type="calendar" size="20" v-else></uni-icons>
+          </view>
+        </view>
       </view>
     </uni-card>
   </view>
@@ -288,28 +283,35 @@ const handleError = () => {
   height: 96%;
 }
 
-.button-list {
+.item-container {
   display: flex;
-  justify-content: space-around;
-  width: 100%;
+  flex-direction: column;
+}
+.item-content {
+  display: flex;
+
+  .huodai {
+    flex: 3;
+  }
+
+  .sku {
+    flex: 3;
+  }
+
+  .easyinput {
+    flex: 1;
+  }
+}
+.content {
+  display: flex;
+  align-items: center;
+  margin: 10rpx 0;
+
+  .content-text {
+    margin-left: 10rpx;
+  }
 }
 
-.box-easyinput {
-  .uni-easyinput {
-    text-align: center;
-  }
-}
-
-.uni-item-row {
-  .uni-row {
-    display: flex;
-    align-items: center;
-    justify-content: start;
-  }
-  .uni-row:last-child {
-    margin-top: 20rpx;
-  }
-}
 .fab {
   position: fixed; /* 固定定位 */
   bottom: 60rpx; /* 距离底部20px */

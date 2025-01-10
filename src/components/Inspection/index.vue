@@ -8,23 +8,42 @@
         <image :src="ProductImage" class="image-content"></image>
       </view>
       <view class="item-container">
+        <view class="container-icon" v-if="status === 'wait'"
+          ><uni-icons type="right" size="20"></uni-icons
+        ></view>
         <view class="item-content">
           <view class="content">
-            <uni-icons custom-prefix="iconfont" type="icon-RectangleCopy2" size="20"></uni-icons>
+            <uni-icons
+              custom-prefix="iconfont"
+              type="icon-RectangleCopy2"
+              size="20"
+            ></uni-icons>
             <text class="content-text">{{ item.platform }}</text>
           </view>
           <view class="content">
-            <uni-icons custom-prefix="iconfont" type="icon-RectangleCopy3" size="20"></uni-icons>
+            <uni-icons
+              custom-prefix="iconfont"
+              type="icon-RectangleCopy3"
+              size="20"
+            ></uni-icons>
             <text class="content-text">{{ item.warehouse }}</text>
           </view>
         </view>
         <view class="item-content">
           <view class="content">
-            <uni-icons custom-prefix="iconfont" type="icon-RectangleCopy1" size="20"></uni-icons>
+            <uni-icons
+              custom-prefix="iconfont"
+              type="icon-RectangleCopy1"
+              size="20"
+            ></uni-icons>
             <text class="content-text">{{ item.createTime }}</text>
           </view>
           <view class="content">
-            <uni-icons custom-prefix="iconfont" type="icon-RectangleCopy" size="20"></uni-icons>
+            <uni-icons
+              custom-prefix="iconfont"
+              type="icon-RectangleCopy"
+              size="20"
+            ></uni-icons>
             <text class="content-text">{{ item.oddNumbers }}</text>
           </view>
         </view>
@@ -67,6 +86,13 @@ const { item, status } = props
   display: flex;
   justify-content: space-around;
   align-items: center;
+  position: relative;
+}
+.container-icon {
+  position: absolute;
+  float: right;
+  top: 0;
+  right: 10rpx;
 }
 .item-content {
   display: flex;
