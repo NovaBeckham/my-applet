@@ -1,8 +1,5 @@
 <template>
-  <view
-    v-if="state.status === 'wait' && boxMap.size > 0"
-    class="camera-container"
-  >
+  <view v-if="isWait && boxMap.size > 0" class="camera-container">
     <camera
       mode="scanCode"
       device-position="back"
@@ -17,10 +14,20 @@
       <view class="uni-item-row">
         <uni-row>
           <uni-col :span="10"
-            ><text>箱号：{{ item[0] }}</text></uni-col
+            ><uni-icons
+              custom-prefix="iconfont"
+              type="icon-huodai"
+              size="20"
+            ></uni-icons
+            ><text>{{ item[0] }}</text></uni-col
           >
           <uni-col :span="10"
-            ><text>sku：{{ item[1].skuNo }}</text></uni-col
+            ><uni-icons
+              custom-prefix="iconfont"
+              type="icon-sku"
+              size="20"
+            ></uni-icons
+            ><text>{{ item[1].skuNo }}</text></uni-col
           >
           <uni-col :span="4"
             ><uni-easyinput
@@ -33,9 +40,14 @@
         </uni-row>
         <uni-row>
           <uni-col :span="22"
-            ><text>SN：{{ item[1].snNo }}</text></uni-col
+            ><uni-icons
+              custom-prefix="iconfont"
+              type="icon-xianghao"
+              size="20"
+            ></uni-icons
+            ><text>{{ item[1].snNo }}</text></uni-col
           >
-          <uni-col :span="2" class="col-checkbox"
+          <uni-col :span="2" class="col-checkbox" v-if="isWait"
             ><uni-icons
               type="calendar-filled"
               size="20"
@@ -48,14 +60,14 @@
       </view>
     </uni-card>
   </view>
-  <view>
+  <view v-if="isWait">
     <button class="fab" @click="onFabClick">完成</button>
   </view>
 </template>
 
 <script setup lang="ts">
 import { onLoad, onUnload } from "@dcloudio/uni-app"
-import { ref } from "vue"
+import { computed, ref } from "vue"
 import { add, clone, isEmpty } from "ramda"
 
 interface BoxItem {
@@ -83,6 +95,13 @@ const targetBox = ref("")
 const result = ref("")
 const showModal = ref(false)
 let scanTimeoutId: null | number = null
+
+/**
+ * @description: 判断是否从待验页面跳转过来的
+ */
+const isWait = computed(() => {
+  return state.value.status === "wait"
+})
 
 onLoad((options?: QueryOptions) => {
   if (options) {

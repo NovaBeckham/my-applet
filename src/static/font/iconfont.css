@@ -11,6 +11,18 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+.icon-sku:before {
+  content: "\e63e";
+}
+
+.icon-xianghao:before {
+  content: "\e657";
+}
+
+.icon-huodai:before {
+  content: "\e7dc";
+}
+
 .icon-RectangleCopy3:before {
   content: "\e6ca";
 }

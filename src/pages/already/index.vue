@@ -67,7 +67,7 @@ const list = ref<Inspection[]>([
 function onClick(value: Inspection) {
   console.log("value", value)
   uni.navigateTo({
-    url: "/pages/box/index?status=wait",
+    url: "/pages/box/index?status=already",
   })
 }
 </script>
