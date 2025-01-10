@@ -30,6 +30,12 @@
       "style": {
         "navigationBarTitleText": "已验"
       }
+    },
+    {
+      "path": "pages/login/index",
+      "style": {
+        "navigationBarTitleText": "验货小程序"
+      }
     }
   ],
   "globalStyle": {

@@ -18,7 +18,7 @@
               type="icon-RectangleCopy2"
               size="20"
             ></uni-icons>
-            <text class="content-text">{{ item.platform }}</text>
+            <text class="content-text">{{ item.warehousePlat }}</text>
           </view>
           <view class="content">
             <uni-icons
@@ -26,7 +26,9 @@
               type="icon-RectangleCopy3"
               size="20"
             ></uni-icons>
-            <text class="content-text">{{ item.warehouse }}</text>
+            <text class="content-text"
+              >{{ item.cartonNum }}箱/{{ item.quantity }}</text
+            >
           </view>
         </view>
         <view class="item-content">
@@ -36,7 +38,9 @@
               type="icon-RectangleCopy1"
               size="20"
             ></uni-icons>
-            <text class="content-text">{{ item.createTime }}</text>
+            <text class="content-text">{{
+              dayjs(item.deliveryDate).format("YYYY-MM-DD")
+            }}</text>
           </view>
           <view class="content">
             <uni-icons
@@ -44,7 +48,7 @@
               type="icon-RectangleCopy"
               size="20"
             ></uni-icons>
-            <text class="content-text">{{ item.oddNumbers }}</text>
+            <text class="content-text">{{ item.ibrNo }}</text>
           </view>
         </view>
       </view>
@@ -53,8 +57,9 @@
 </template>
 
 <script setup lang="ts">
+import type { Inspection } from "@/api"
+import dayjs from "dayjs"
 import ProductImage from "@/static/product.png"
-import type { Inspection } from "@/interface"
 
 interface Props {
   item: Inspection

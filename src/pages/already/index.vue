@@ -1,73 +1,34 @@
 <template>
-  <view v-for="item in list" :key="item.oddNumbers" @click="onClick">
+  <view v-for="item in list" :key="item.id" @click="onClick(item.id)">
     <InspectionCom :item="item" status="already" />
   </view>
 </template>
 
 <script setup lang="ts">
 import { ref } from "vue"
-import type { Inspection } from "@/interface"
 import InspectionCom from "@/components/Inspection/index.vue"
+import { getFinishList, type Inspection } from "@/api"
+import { onLoad } from "@dcloudio/uni-app"
+import { isNil } from "ramda"
 
-const list = ref<Inspection[]>([
-  {
-    oddNumbers: "单号111111111111",
-    platform: "shopify",
-    goods: "商品111",
-    createTime: "2024-09-25",
-    warehouse: "分仓111",
-    boxList: [
-      { boxNo: "1111", skuNo: "1111", snNo: "1111" },
-      { boxNo: "2222", skuNo: "2222", snNo: "2222" },
-      { boxNo: "3333", skuNo: "3333", snNo: "3333" },
-      { boxNo: "4444", skuNo: "4444", snNo: "4444" },
-    ],
-  },
-  {
-    oddNumbers: "单号222222222222",
-    platform: "shopify",
-    goods: "商品111",
-    createTime: "2024-09-25",
-    warehouse: "分仓111",
-    boxList: [
-      { boxNo: "1111", skuNo: "1111", snNo: "1111" },
-      { boxNo: "2222", skuNo: "2222", snNo: "2222" },
-      { boxNo: "3333", skuNo: "3333", snNo: "3333" },
-      { boxNo: "4444", skuNo: "4444", snNo: "4444" },
-    ],
-  },
-  {
-    oddNumbers: "单号333333333333",
-    platform: "shopify",
-    goods: "商品111",
-    createTime: "2024-09-25",
-    warehouse: "分仓111",
-    boxList: [
-      { boxNo: "1111", skuNo: "1111", snNo: "1111" },
-      { boxNo: "2222", skuNo: "2222", snNo: "2222" },
-      { boxNo: "3333", skuNo: "3333", snNo: "3333" },
-      { boxNo: "4444", skuNo: "4444", snNo: "4444" },
-    ],
-  },
-  {
-    oddNumbers: "单号444444444444",
-    platform: "shopify",
-    goods: "商品111",
-    createTime: "2024-09-25",
-    warehouse: "分仓111",
-    boxList: [
-      { boxNo: "1111", skuNo: "1111", snNo: "1111" },
-      { boxNo: "2222", skuNo: "2222", snNo: "2222" },
-      { boxNo: "3333", skuNo: "3333", snNo: "3333" },
-      { boxNo: "4444", skuNo: "4444", snNo: "4444" },
-    ],
-  },
-])
+const list = ref<Inspection[]>([])
 
-function onClick(value: Inspection) {
-  console.log("value", value)
+onLoad((options?: { productId?: string }) => {
+  if (options && !isNil(options.productId)) {
+    console.log('productId', options.productId)
+    getFinishList(options.productId).then((res) => {
+      const { code, data } = res
+      if (code === 200 && !isNil(data)) {
+        list.value = data
+      }
+    })
+  }
+})
+
+function onClick(deliveryTaskId: number) {
+  console.log("deliveryTaskId", deliveryTaskId)
   uni.navigateTo({
-    url: "/pages/box/index?status=already",
+    url: `/pages/box/index?status=already&deliveryTaskId=${deliveryTaskId}`,
   })
 }
 </script>

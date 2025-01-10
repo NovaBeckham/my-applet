@@ -19,7 +19,7 @@
               type="icon-huodai"
               size="20"
             ></uni-icons>
-            <text class="content-text">{{ item[0] }}</text>
+            <text class="content-text">{{ item[1].ibrNo }}</text>
           </view>
           <view class="content sku">
             <uni-icons
@@ -27,7 +27,7 @@
               type="icon-sku"
               size="20"
             ></uni-icons>
-            <text class="content-text">{{ item[1].skuNo }}</text>
+            <text class="content-text">{{ item[1].skuId }}</text>
           </view>
           <view class="content easyinput">
             <uni-tag :text="`x ${item[1].value}`" type="primary" />
@@ -40,7 +40,7 @@
               type="icon-xianghao"
               size="20"
             ></uni-icons>
-            <text class="content-text">{{ item[1].snNo }}</text>
+            <text class="content-text">{{ item[0] }}</text>
           </view>
           <view class="content" v-if="isWait">
             <uni-icons
@@ -61,26 +61,21 @@
 </template>
 
 <script setup lang="ts">
-import { onLoad, onUnload } from "@dcloudio/uni-app"
+import { onLoad } from "@dcloudio/uni-app"
 import { computed, ref } from "vue"
-import { add, clone, isEmpty } from "ramda"
-
-interface BoxItem {
-  boxNo?: string
-  skuNo?: string
-  snNo?: string
-  value?: number
-  boxNoCheck?: number
-  skuNoCheck?: number
-  snNoCheck?: number
-}
+import { add, isEmpty, isNil } from "ramda"
+import { boxCheckFinish, getCartonList, type CartonRecord } from "@/api"
 
 interface QueryOptions {
   status?: "wait" | "already"
-  oddNumbers?: string
-  platform?: string
-  goods?: string
-  warehouse?: string
+  deliveryTaskId?: string
+}
+
+interface BoxItem extends CartonRecord {
+  value?: number
+  cartonNoCheck?: number
+  skuIdCheck?: number
+  ibrCheck?: number
 }
 
 const isScanAllowed = ref(true)
@@ -101,65 +96,35 @@ const isWait = computed(() => {
 onLoad((options?: QueryOptions) => {
   if (options) {
     state.value = options
-    const boxList = [
-      {
-        boxNo: "1111",
-        skuNo: "111111111",
-        snNo: "1111",
-        value: 1,
-        boxNoCheck: 1,
-        skuNoCheck: 1,
-        snNoCheck: 1,
-      },
-      {
-        boxNo: "6900966577117",
-        skuNo: "6973939344870",
-        snNo: "6922266450365",
-        value: 0,
-        boxNoCheck: 0,
-        skuNoCheck: 0,
-        snNoCheck: 0,
-      },
-      {
-        boxNo: "3333",
-        skuNo: "333333333",
-        snNo: "3333",
-        value: 0,
-        boxNoCheck: 0,
-        skuNoCheck: 0,
-        snNoCheck: 0,
-      },
-      {
-        boxNo: "4444",
-        skuNo: "444444444",
-        snNo: "4444",
-        value: 0,
-        boxNoCheck: 0,
-        skuNoCheck: 0,
-        snNoCheck: 0,
-      },
-    ]
-    const listMap: Map<string, BoxItem> = new Map()
-    boxList.forEach((item) => {
-      listMap.set(item.boxNo ?? "", clone(item))
+    getCartonList(options.deliveryTaskId ?? "").then((res) => {
+      const { code, data } = res
+      if (code === 200 && !isNil(data)) {
+        const listMap: Map<string, BoxItem> = new Map()
+        data.forEach((item) => {
+          listMap.set(item.cartonNo ?? "", {
+            ...item,
+            value: 0,
+            cartonNoCheck: 0,
+            skuIdCheck: 0,
+            ibrCheck: 0,
+          })
+        })
+        boxMap.value = listMap
+      }
     })
-    boxMap.value = listMap
-    // listMap.clear()
   }
-})
-
-onUnload(() => {
-  console.log("离开")
 })
 
 const onFabClick = () => {
-  const item = boxMap.value.get("2222")
-  if (item) {
-    item.boxNoCheck = add(item.boxNoCheck ?? 0, 1)
-    item.skuNoCheck = add(item.skuNoCheck ?? 0, 1)
-    item.snNoCheck = add(item.snNoCheck ?? 0, 1)
-    item.value = item.boxNoCheck
-  }
+  boxCheckFinish(state.value.deliveryTaskId ?? "").then((res) => {
+    const { code } = res
+    if (code === 200) {
+      uni.showToast({
+        title: "验证成功",
+      })
+      uni.navigateBack()
+    }
+  })
 }
 
 const checkTarget = () => {
@@ -167,12 +132,11 @@ const checkTarget = () => {
   if (boxItem) {
     if (isEmpty(targetBox.value) || targetBox.value !== result.value) {
       targetBox.value = result.value
-      boxItem.boxNoCheck = add(boxItem.boxNoCheck ?? 0, 1)
+      boxItem.cartonNoCheck = add(boxItem.cartonNoCheck ?? 0, 1)
     } else {
       showModal.value = true
       uni.showModal({
         title: "提示",
-        icon: "error",
         content: "扫码重复",
         showCancel: false, // 不显示取消按钮
         confirmText: "好的", // 确认按钮的文字
@@ -188,7 +152,6 @@ const checkTarget = () => {
       showModal.value = true
       uni.showModal({
         title: "错误",
-        icon: "error",
         content: "请先扫箱号",
         showCancel: false,
         confirmText: "好的",
@@ -201,7 +164,7 @@ const checkTarget = () => {
     } else {
       const item = boxMap.value.get(targetBox.value)
       if (item) {
-        if (item.snNo !== result.value && item.skuNo !== result.value) {
+        if (item.ibrNo !== result.value && item.skuId !== result.value) {
           showModal.value = true
           uni.showModal({
             title: "错误",
@@ -218,19 +181,19 @@ const checkTarget = () => {
           return
         }
         // 和SKU匹配
-        if (item.skuNo === result.value) {
-          item.skuNoCheck = add(item.skuNoCheck ?? 0, 1)
+        if (item.skuId === result.value) {
+          item.skuIdCheck = add(item.skuIdCheck ?? 0, 1)
         }
         // 和SN匹配
-        if (item.snNo === result.value) {
-          item.snNoCheck = add(item.snNoCheck ?? 0, 1)
+        if (item.ibrNo === result.value) {
+          item.ibrCheck = add(item.ibrCheck ?? 0, 1)
         }
         if (
-          item.boxNoCheck === item.skuNoCheck &&
-          item.boxNoCheck === item.snNoCheck &&
-          item.boxNoCheck !== item.value
+          item.cartonNoCheck === item.skuIdCheck &&
+          item.cartonNoCheck === item.ibrCheck &&
+          item.cartonNoCheck !== item.value
         ) {
-          item.value = item.boxNoCheck
+          item.value = item.cartonNoCheck
         }
       }
     }
@@ -239,7 +202,10 @@ const checkTarget = () => {
 
 const handleScanCode = (e: any) => {
   if (isScanAllowed.value && !showModal.value) {
-    console.log("result", e.detail.result)
+    uni.showToast({
+      title: `${e.detail.result}`,
+      icon: "success",
+    })
     result.value = e.detail.result
     checkTarget()
     // 处理扫码结果
@@ -252,7 +218,7 @@ const handleScanCode = (e: any) => {
     }
     scanTimeoutId = setTimeout(() => {
       isScanAllowed.value = true
-    }, 2000) // 2秒后再次启用扫码功能
+    }, 1500) // 1.5秒后再次启用扫码功能
     // if
   }
 }

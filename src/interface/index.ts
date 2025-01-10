@@ -6,3 +6,9 @@ export interface Inspection {
   warehouse?: string
   boxList?: Array<{ boxNo?: string; skuNo?: string; snNo?: string }>
 }
+
+export interface DeliveryResponse<T> {
+  code: number
+  message: string | null
+  data?: T
+}
