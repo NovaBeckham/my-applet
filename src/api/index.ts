@@ -84,3 +84,19 @@ export const getProductList = () => {
     url: "/rest/iniasc/deliveryTask/waitList",
   })
 }
+
+/**
+ * 
+ * @param file 
+ * @description 上传文件
+ */
+export const uploadFileByExcel = (file: File) => {
+  return request<DeliveryResponse<undefined>>({
+    url: "/rest/iniasc/deliveryTask/importDeliveryTask",
+    method: "POST",
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+    data: file,
+  })
+}

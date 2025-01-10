@@ -19,8 +19,8 @@ export const request = <T = any>(options: RequestOptions): Promise<T> => {
   return new Promise((resolve, reject) => {
     uni.request({
       url: `${BaseURL}${options.url}`,
-      method: options.method || "GET",
-      data: options.data || {},
+      method: options.method ?? "GET",
+      data: options.data ?? {},
       header: {
         "Content-Type": "application/json",
         ...options.headers,
@@ -31,6 +31,9 @@ export const request = <T = any>(options: RequestOptions): Promise<T> => {
         if (res.statusCode === 200) {
           resolve(res.data as T)
         } else {
+          uni.showToast({
+            title: `${res.errMsg}`,
+          })
           reject(res)
         }
       },
