@@ -38,17 +38,29 @@ const toWait = (productId: number) => {
 
 const fileSelect = (res: any) => {
   console.log("res", res)
-  const { tempFilePaths } = res
-  console.log("files", files)
+  const { tempFilePaths, tempFiles } = res
+  console.log("tempFilePaths", tempFilePaths)
   const UID = uni.getStorageSync("UID")
   const LT = uni.getStorageSync("LT")
+  const files = [
+    {
+      name: tempFiles[0].name,
+      uri: tempFiles[0].url,
+      file: tempFiles[0].file,
+    },
+  ]
   const result = uni.uploadFile({
     url: `${BaseURL}/rest/iniasc/deliveryTask/importDeliveryTask`,
     header: {
       Cookie: `UID=${UID}; LT=${LT}`,
+      "Content-Type": "multipart/form-data",
     },
-    name: "file",
-    filePath: tempFilePaths[0],
+    formData: {
+      file: JSON.stringify(files),
+    },
+    files,
+    filePath: tempFiles[0].url,
+    name: 'file',
   })
   console.log("result", result)
 }
