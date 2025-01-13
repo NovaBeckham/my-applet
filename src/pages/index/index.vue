@@ -13,83 +13,26 @@
         ref="files"
         file-mediatype="all"
         @select="fileSelect"
-        @upload="onUpload"
       ></uni-file-picker>
     </view>
   </view>
 </template>
 
 <script setup lang="ts">
-import { getProductList, ProductList, uploadFileByExcel } from "@/api"
+import { getProductList, ProductList } from "@/api"
 import { BaseURL } from "@/utils/config"
 import { onLoad } from "@dcloudio/uni-app"
-import { isEmpty, isNil, map } from "ramda"
+import { isEmpty, isNil } from "ramda"
 import { ref } from "vue"
 
 const files = ref<any>(null)
 
-const list = ref<ProductList[]>([
-  {
-    id: 8,
-    productName: "Model3",
-    vendor: "BSD",
-    status: 1,
-    seqNo: 2,
-    productImg: null,
-  },
-  {
-    id: 9,
-    productName: "Model-S",
-    vendor: "范丝哲",
-    status: 1,
-    seqNo: 3,
-    productImg: null,
-  },
-  {
-    id: 10,
-    productName: "X3",
-    vendor: "尖超",
-    status: 1,
-    seqNo: 4,
-    productImg: null,
-  },
-  {
-    id: 11,
-    productName: "New-Model-S",
-    vendor: "BSD",
-    status: 1,
-    seqNo: 5,
-    productImg: null,
-  },
-  {
-    id: 12,
-    productName: "New-Mask",
-    vendor: "思肯",
-    status: 1,
-    seqNo: 6,
-    productImg: null,
-  },
-  {
-    id: 13,
-    productName: "XE",
-    vendor: "初见未来",
-    status: 1,
-    seqNo: 7,
-    productImg: null,
-  },
-  {
-    id: 14,
-    productName: "N5-Lite",
-    vendor: "启哲",
-    status: 1,
-    seqNo: 8,
-    productImg: null,
-  },
-])
+const list = ref<ProductList[]>([])
 
 const toWait = (productId: number) => {
+  uni.setStorageSync("productId", productId)
   uni.switchTab({
-    url: `/pages/wait/index?productId=${productId}`,
+    url: `/pages/wait/index`,
   })
 }
 
@@ -105,38 +48,32 @@ const fileSelect = (res: any) => {
       Cookie: `UID=${UID}; LT=${LT}`,
     },
     name: "file",
-    filePath: tempFilePaths[0]
+    filePath: tempFilePaths[0],
   })
   console.log("result", result)
-}
-
-const onUpload = () => {
-  const formData = new FormData()
-  console.log("files", files.value)
-  // formData.append(files.value)
-  // uploadFileByExcel()
 }
 
 onLoad(() => {
   const UID = uni.getStorageSync("UID")
   const LT = uni.getStorageSync("LT")
-  // if (isNil(UID) || isEmpty(UID)) {
-  //   uni.showToast({
-  //     title: "请重新登录",
-  //   })
-  //   uni.reLaunch({
-  //     url: "/pages/login/index",
-  //   })
-  // } else {
-  //   console.log('UID', UID)
-  //   console.log('LT', LT)
-  //   getProductList().then((res) => {
-  //     const { code, data } = res
-  //     if (code === 200 && !isNil(data)) {
-  //       list.value = data
-  //     }
-  //   })
-  // }
+  uni.removeStorageSync("productId")
+  if (isNil(UID) || isEmpty(UID)) {
+    uni.showToast({
+      title: "请重新登录",
+    })
+    uni.reLaunch({
+      url: "/pages/login/index",
+    })
+  } else {
+    console.log("UID", UID)
+    console.log("LT", LT)
+    getProductList().then((res) => {
+      const { code, data } = res
+      if (code === 200 && !isNil(data)) {
+        list.value = data
+      }
+    })
+  }
 })
 </script>
 

@@ -35,7 +35,8 @@
 
 <script setup lang="ts">
 import { BaseURL } from "@/utils/config"
-import { isEmpty } from "ramda"
+import { onLoad } from "@dcloudio/uni-app"
+import { isEmpty, isNil } from "ramda"
 import { ref } from "vue"
 
 const rules = {
@@ -77,6 +78,7 @@ const onSubmit = async () => {
           if (cookieMap.UID && cookieMap.LT) {
             uni.setStorageSync("UID", cookieMap.UID)
             uni.setStorageSync("LT", cookieMap.LT)
+            uni.setStorageSync("mobile", formData.value.mobile)
             uni.switchTab({
               url: "/pages/index/index",
             })
@@ -85,6 +87,13 @@ const onSubmit = async () => {
       })
   }
 }
+
+onLoad(() => {
+  const mobile = uni.getStorageSync("mobile")
+  if (!isNil(mobile)) {
+    formData.value.mobile = mobile
+  }
+})
 </script>
 
 <style lang="scss">

@@ -29,7 +29,19 @@ export const request = <T = any>(options: RequestOptions): Promise<T> => {
       },
       success: (res) => {
         if (res.statusCode === 200) {
-          resolve(res.data as T)
+          if (!isNil(res.data)) {
+            const data: any = res.data
+            if (data.code === 403) {
+              uni.showToast({
+                title: "请重新登录",
+              })
+              uni.reLaunch({
+                url: "/pages/login/index",
+              })
+              return
+            }
+            resolve(res.data as T)
+          }
         } else {
           uni.showToast({
             title: `${res.errMsg}`,

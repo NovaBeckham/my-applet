@@ -1,6 +1,10 @@
 import { DeliveryResponse } from "@/interface"
 import { request } from "@/utils/request"
 
+interface ListResponse {
+  dateList?: Inspection[]
+}
+
 export interface Inspection {
   cartonNum: number
   createTime: number
@@ -23,12 +27,12 @@ export interface ProductList {
 }
 
 export interface CartonRecord {
-  cartonNo: string
-  deliveryTaskId: number
-  ibrNo: string
-  id: number
-  logisticNo: string
-  skuId: string
+  cartonNo?: string
+  deliveryTaskId?: number
+  ibrNo?: string
+  id?: number
+  logisticNo?: string
+  skuId?: string
 }
 
 /**
@@ -37,7 +41,7 @@ export interface CartonRecord {
  * @description 获取待验列表
  */
 export const getWaitList = (productId: string) => {
-  return request<DeliveryResponse<Inspection[] | undefined>>({
+  return request<DeliveryResponse<ListResponse | undefined>>({
     url: `/rest/iniasc/deliveryTask/waitList?productId=${productId}`,
   })
 }
@@ -48,7 +52,7 @@ export const getWaitList = (productId: string) => {
  * @description 获取已验列表
  */
 export const getFinishList = (productId: string) => {
-  return request<DeliveryResponse<Inspection[] | undefined>>({
+  return request<DeliveryResponse<ListResponse | undefined>>({
     url: `/rest/iniasc/deliveryTask/finishList?productId=${productId}`,
   })
 }
@@ -81,22 +85,6 @@ export const boxCheckFinish = (deliveryTaskId: string) => {
  */
 export const getProductList = () => {
   return request<DeliveryResponse<ProductList[] | undefined>>({
-    url: "/rest/iniasc/deliveryTask/waitList",
-  })
-}
-
-/**
- * 
- * @param file 
- * @description 上传文件
- */
-export const uploadFileByExcel = (file: File) => {
-  return request<DeliveryResponse<undefined>>({
-    url: "/rest/iniasc/deliveryTask/importDeliveryTask",
-    method: "POST",
-    headers: {
-      "Content-Type": "multipart/form-data",
-    },
-    data: file,
+    url: "/rest/iniasc/product/list",
   })
 }

@@ -11,7 +11,7 @@
         <view class="container-icon" v-if="status === 'wait'"
           ><uni-icons type="right" size="20"></uni-icons
         ></view>
-        <view class="item-content">
+        <view class="item-content first">
           <view class="content">
             <uni-icons
               custom-prefix="iconfont"
@@ -31,7 +31,7 @@
             >
           </view>
         </view>
-        <view class="item-content">
+        <view class="item-content second">
           <view class="content">
             <uni-icons
               custom-prefix="iconfont"
@@ -48,7 +48,7 @@
               type="icon-RectangleCopy"
               size="20"
             ></uni-icons>
-            <text class="content-text">{{ item.ibrNo }}</text>
+            <view class="content-text">{{ item.ibrNo }}</view>
           </view>
         </view>
       </view>
@@ -105,10 +105,17 @@ const { item, status } = props
   justify-content: space-around;
   align-items: start;
 }
+.first {
+  flex: 1;
+}
+.second {
+  flex: 2;
+}
 .content {
   display: flex;
   align-items: center;
   margin: 10rpx 0;
+  word-break: break-all;
 }
 .content-text {
   line-height: 30rpx;

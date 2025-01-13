@@ -8,19 +8,24 @@
 import { ref } from "vue"
 import InspectionCom from "@/components/Inspection/index.vue"
 import { getFinishList, type Inspection } from "@/api"
-import { onLoad } from "@dcloudio/uni-app"
+import { onShow } from "@dcloudio/uni-app"
 import { isNil } from "ramda"
 
 const list = ref<Inspection[]>([])
 
-onLoad((options?: { productId?: string }) => {
-  if (options && !isNil(options.productId)) {
-    console.log('productId', options.productId)
-    getFinishList(options.productId).then((res) => {
+onShow(() => {
+  const productId = uni.getStorageSync("productId")
+  if (!isNil(productId)) {
+    console.log("productId", productId)
+    getFinishList(productId).then((res) => {
       const { code, data } = res
-      if (code === 200 && !isNil(data)) {
-        list.value = data
+      if (code === 200 && !isNil(data) && !isNil(data.dateList)) {
+        list.value = data.dateList ?? []
       }
+    })
+  } else {
+    uni.showToast({
+      title: "请从首页点击进入",
     })
   }
 })

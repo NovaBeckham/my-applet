@@ -13,7 +13,11 @@
     <uni-card>
       <view class="item-container">
         <view class="item-content">
-          <view class="content huodai">
+          <view
+            :class="`content huodai ${
+              item[1].ibrCheck ? 'isCheck' : 'noCheck'
+            }`"
+          >
             <uni-icons
               custom-prefix="iconfont"
               type="icon-huodai"
@@ -21,7 +25,9 @@
             ></uni-icons>
             <text class="content-text">{{ item[1].ibrNo }}</text>
           </view>
-          <view class="content sku">
+          <view
+            :class="`content sku ${item[1].skuIdCheck ? 'isCheck' : 'noCheck'}`"
+          >
             <uni-icons
               custom-prefix="iconfont"
               type="icon-sku"
@@ -30,11 +36,15 @@
             <text class="content-text">{{ item[1].skuId }}</text>
           </view>
           <view class="content easyinput">
-            <uni-tag :text="`x ${item[1].value}`" type="primary" />
+            <uni-tag :text="`x ${item[1].skuIdCheck}`" type="primary" />
           </view>
         </view>
-        <view>
-          <view class="content">
+        <view class="item-content">
+          <view
+            :class="`content xianghao ${
+              item[1].cartonNoCheck ? 'isCheck' : 'noCheck'
+            }`"
+          >
             <uni-icons
               custom-prefix="iconfont"
               type="icon-xianghao"
@@ -42,12 +52,16 @@
             ></uni-icons>
             <text class="content-text">{{ item[0] }}</text>
           </view>
-          <view class="content" v-if="isWait">
+          <view class="content calendar" v-if="isWait">
             <uni-icons
               type="calendar-filled"
               size="20"
               color="#2da641"
-              v-if="item[1].value && item[1].value > 0"
+              v-if="
+                item[1].cartonNoCheck > 0 &&
+                item[1].ibrCheck > 0 &&
+                item[1].skuIdCheck > 0
+              "
             ></uni-icons
             ><uni-icons type="calendar" size="20" v-else></uni-icons>
           </view>
@@ -72,10 +86,9 @@ interface QueryOptions {
 }
 
 interface BoxItem extends CartonRecord {
-  value?: number
-  cartonNoCheck?: number
-  skuIdCheck?: number
-  ibrCheck?: number
+  cartonNoCheck: number
+  skuIdCheck: number
+  ibrCheck: number
 }
 
 const isScanAllowed = ref(true)
@@ -100,10 +113,17 @@ onLoad((options?: QueryOptions) => {
       const { code, data } = res
       if (code === 200 && !isNil(data)) {
         const listMap: Map<string, BoxItem> = new Map()
+        listMap.set("6922266450365", {
+          cartonNo: "6922266450365",
+          skuId: "6900966577117",
+          ibrNo: "6973939344870",
+          cartonNoCheck: 0,
+          skuIdCheck: 0,
+          ibrCheck: 0,
+        })
         data.forEach((item) => {
           listMap.set(item.cartonNo ?? "", {
             ...item,
-            value: 0,
             cartonNoCheck: 0,
             skuIdCheck: 0,
             ibrCheck: 0,
@@ -116,6 +136,25 @@ onLoad((options?: QueryOptions) => {
 })
 
 const onFabClick = () => {
+  let cartonNo = ""
+  boxMap.value.forEach((value, key) => {
+    if (
+      value.cartonNoCheck === 0 ||
+      value.ibrCheck === 0 ||
+      value.skuIdCheck === 0
+    ) {
+      cartonNo = key
+    }
+  })
+  if (!isEmpty(cartonNo)) {
+    uni.showModal({
+      title: "错误",
+      content: `箱号 ${cartonNo} 还未验证成功`,
+      showCancel: false,
+      confirmText: "好的",
+    })
+    return
+  }
   boxCheckFinish(state.value.deliveryTaskId ?? "").then((res) => {
     const { code } = res
     if (code === 200) {
@@ -130,23 +169,12 @@ const onFabClick = () => {
 const checkTarget = () => {
   const boxItem = boxMap.value.get(result.value)
   if (boxItem) {
-    if (isEmpty(targetBox.value) || targetBox.value !== result.value) {
-      targetBox.value = result.value
-      boxItem.cartonNoCheck = add(boxItem.cartonNoCheck ?? 0, 1)
-    } else {
-      showModal.value = true
-      uni.showModal({
-        title: "提示",
-        content: "扫码重复",
-        showCancel: false, // 不显示取消按钮
-        confirmText: "好的", // 确认按钮的文字
-        success: (result) => {
-          if (result.confirm) {
-            showModal.value = false
-          }
-        },
-      })
-    }
+    targetBox.value = result.value
+    uni.showToast({
+      title: `箱号：${result.value}`,
+      icon: "success",
+    })
+    boxItem.cartonNoCheck = add(boxItem.cartonNoCheck ?? 0, 1)
   } else {
     if (isEmpty(targetBox.value)) {
       showModal.value = true
@@ -182,18 +210,19 @@ const checkTarget = () => {
         }
         // 和SKU匹配
         if (item.skuId === result.value) {
+          uni.showToast({
+            title: `SKU：${result.value}`,
+            icon: "success",
+          })
           item.skuIdCheck = add(item.skuIdCheck ?? 0, 1)
         }
-        // 和SN匹配
+        // 和ibr匹配
         if (item.ibrNo === result.value) {
           item.ibrCheck = add(item.ibrCheck ?? 0, 1)
-        }
-        if (
-          item.cartonNoCheck === item.skuIdCheck &&
-          item.cartonNoCheck === item.ibrCheck &&
-          item.cartonNoCheck !== item.value
-        ) {
-          item.value = item.cartonNoCheck
+          uni.showToast({
+            title: `货代号：${result.value}`,
+            icon: "success",
+          })
         }
       }
     }
@@ -261,20 +290,31 @@ const handleError = () => {
   }
 
   .sku {
-    flex: 3;
+    flex: 2;
   }
 
   .easyinput {
+    flex: 1;
+  }
+
+  .xianghao {
+    flex: 5;
+  }
+
+  .calendar {
     flex: 1;
   }
 }
 .content {
   display: flex;
   align-items: center;
+  justify-content: start;
   margin: 10rpx 0;
+  word-break: break-all;
 
   .content-text {
     margin-left: 10rpx;
+    width: 80%;
   }
 }
 
@@ -297,5 +337,13 @@ const handleError = () => {
 
 .fab:hover {
   background-color: #3700b3; /* 悬停时的背景色 */
+}
+
+.noCheck {
+  color: rgba(206, 206, 206, 1);
+}
+
+.isCheck {
+  color: rgba(33, 84, 118, 1);
 }
 </style>
