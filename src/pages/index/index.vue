@@ -37,18 +37,9 @@ const toWait = (productId: number) => {
 }
 
 const fileSelect = (res: any) => {
-  console.log("res", res)
-  const { tempFilePaths, tempFiles } = res
-  console.log("tempFilePaths", tempFilePaths)
+  const { tempFiles } = res
   const UID = uni.getStorageSync("UID")
   const LT = uni.getStorageSync("LT")
-  const files = [
-    {
-      name: tempFiles[0].name,
-      uri: tempFiles[0].url,
-      file: tempFiles[0].file,
-    },
-  ]
   const result = uni.uploadFile({
     url: `${BaseURL}/rest/iniasc/deliveryTask/importDeliveryTask`,
     header: {
@@ -56,11 +47,11 @@ const fileSelect = (res: any) => {
       "Content-Type": "multipart/form-data",
     },
     formData: {
-      file: JSON.stringify(files),
+      // file: JSON.stringify(files),
+      originalFilename: tempFiles[0].name,
     },
-    files,
     filePath: tempFiles[0].url,
-    name: 'file',
+    name: "file",
   })
   console.log("result", result)
 }
