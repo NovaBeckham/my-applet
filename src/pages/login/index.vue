@@ -1,25 +1,29 @@
 <template>
   <view class="login-container">
     <view class="login-info">
-      <cover-image src="/static/logo.png"></cover-image>
-      <text>验货小程序</text>
+      <image mode="aspectFit" src="/static/logo.png"></image>
+      <view>
+        <text>验货小程序</text>
+      </view>
     </view>
-    <uni-forms ref="loginForm" :modelValue="formData" :rules="rules">
-      <uni-forms-item label="手机号" name="mobile">
-        <uni-easyinput
-          type="text"
-          v-model="formData.mobile"
-          placeholder="请输入手机号"
-        />
-      </uni-forms-item>
-      <uni-forms-item label="密码" name="password">
-        <uni-easyinput
-          type="password"
-          v-model="formData.password"
-          placeholder="请输入密码"
-        />
-      </uni-forms-item>
-    </uni-forms>
+    <view style="margin-top: 160rpx;">
+      <uni-forms ref="loginForm" :modelValue="formData" :rules="rules">
+        <uni-forms-item label="手机号" name="mobile">
+          <uni-easyinput
+            type="number"
+            v-model="formData.mobile"
+            placeholder="请输入手机号"
+          />
+        </uni-forms-item>
+        <uni-forms-item label="密码" name="password">
+          <uni-easyinput
+            type="password"
+            v-model="formData.password"
+            placeholder="请输入密码"
+          />
+        </uni-forms-item>
+      </uni-forms>
+    </view>
     <button
       type="default"
       @click="onSubmit"
@@ -118,8 +122,9 @@ onLoad(() => {
   margin: 50rpx auto;
   text-align: center;
 
-  cover-image {
-    width: 50%;
+  image {
+    width: 278rpx;
+    height: 139rpx;
     margin: 20rpx auto;
   }
 

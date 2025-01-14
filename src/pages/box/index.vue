@@ -10,20 +10,21 @@
     />
   </view>
   <view v-for="item in boxMap" :key="item[0]">
-    <uni-card>
+    <uni-card padding="0">
       <view class="item-container">
         <view class="item-content">
           <view
             :class="`content huodai ${
-              item[1].ibrCheck ? 'isCheck' : 'noCheck'
+              item[1].logisticCheck ? 'isCheck' : 'noCheck'
             }`"
           >
             <uni-icons
               custom-prefix="iconfont"
               type="icon-huodai"
-              size="20"
+              class="box-icon"
+              size="28"
             ></uni-icons>
-            <text class="content-text">{{ item[1].ibrNo }}</text>
+            <text class="content-text">{{ item[1].logisticNo }}</text>
           </view>
           <view
             :class="`content sku ${item[1].skuIdCheck ? 'isCheck' : 'noCheck'}`"
@@ -31,7 +32,8 @@
             <uni-icons
               custom-prefix="iconfont"
               type="icon-sku"
-              size="20"
+              class="box-icon"
+              size="28"
             ></uni-icons>
             <text class="content-text">{{ item[1].skuId }}</text>
           </view>
@@ -48,22 +50,23 @@
             <uni-icons
               custom-prefix="iconfont"
               type="icon-xianghao"
-              size="20"
+              class="box-icon"
+              size="28"
             ></uni-icons>
             <text class="content-text">{{ item[0] }}</text>
           </view>
           <view class="content calendar" v-if="isWait">
             <uni-icons
               type="calendar-filled"
-              size="20"
+              size="26"
               color="#2da641"
               v-if="
                 item[1].cartonNoCheck > 0 &&
-                item[1].ibrCheck > 0 &&
+                item[1].logisticCheck > 0 &&
                 item[1].skuIdCheck > 0
               "
             ></uni-icons
-            ><uni-icons type="calendar" size="20" v-else></uni-icons>
+            ><uni-icons type="calendar" size="26" v-else></uni-icons>
           </view>
         </view>
       </view>
@@ -75,9 +78,9 @@
 </template>
 
 <script setup lang="ts">
-import { onLoad } from "@dcloudio/uni-app"
+import { onHide, onLoad, onUnload } from "@dcloudio/uni-app"
 import { computed, ref } from "vue"
-import { add, isEmpty, isNil } from "ramda"
+import { add, clone, isEmpty, isNil } from "ramda"
 import { boxCheckFinish, getCartonList, type CartonRecord } from "@/api"
 
 interface QueryOptions {
@@ -88,10 +91,11 @@ interface QueryOptions {
 interface BoxItem extends CartonRecord {
   cartonNoCheck: number
   skuIdCheck: number
-  ibrCheck: number
+  logisticCheck: number
 }
 
 const isScanAllowed = ref(true)
+const isAllCheck = ref(false)
 const state = ref<QueryOptions>({})
 const boxMap = ref<Map<string, BoxItem>>(new Map())
 const targetBox = ref("")
@@ -115,16 +119,30 @@ onLoad(async (options?: QueryOptions) => {
     const { code, data } = await getCartonList(options.deliveryTaskId ?? "")
     uni.hideLoading()
     if (code === 200 && !isNil(data) && !isEmpty(data)) {
+      const list: BoxItem[] | undefined = uni.getStorageSync(
+        options.deliveryTaskId ?? ""
+      )
+      const storageMap: Map<string, BoxItem> = new Map()
+      if (!isNil(list) && !isEmpty(list)) {
+        list.forEach((item) => {
+          storageMap.set(item.cartonNo ?? "", item)
+        })
+      }
       const listMap: Map<string, BoxItem> = new Map()
       data.forEach((item) => {
-        listMap.set(item.cartonNo ?? "", {
-          ...item,
-          cartonNoCheck: 0,
-          skuIdCheck: 0,
-          ibrCheck: 0,
-        })
+        const oldItem = storageMap.get(item.cartonNo ?? "")
+        const newItem = isNil(oldItem)
+          ? {
+              ...item,
+              cartonNoCheck: 0,
+              skuIdCheck: 0,
+              logisticCheck: 0,
+            }
+          : clone(oldItem)
+        listMap.set(item.cartonNo ?? "", newItem)
       })
       boxMap.value = listMap
+      storageMap.clear()
     } else {
       uni.showToast({
         title: "数据为空",
@@ -134,12 +152,23 @@ onLoad(async (options?: QueryOptions) => {
   }
 })
 
+onUnload(() => {
+  console.log('onHide')
+  if (!isAllCheck.value) {
+    const list: BoxItem[] = []
+    boxMap.value.forEach((value) => {
+      list.push(clone(value))
+    })
+    uni.setStorageSync(state.value.deliveryTaskId ?? "", list)
+  }
+})
+
 const onFabClick = async () => {
   let cartonNo = ""
   boxMap.value.forEach((value, key) => {
     if (
       value.cartonNoCheck === 0 ||
-      value.ibrCheck === 0 ||
+      value.logisticCheck === 0 ||
       value.skuIdCheck === 0
     ) {
       cartonNo = key
@@ -163,6 +192,8 @@ const onFabClick = async () => {
     uni.showToast({
       title: "验证成功",
     })
+    isAllCheck.value = true
+    uni.removeStorageSync(state.value.deliveryTaskId ?? "")
     uni.navigateBack()
   } else {
     uni.showToast({
@@ -186,7 +217,7 @@ const checkTarget = () => {
       showModal.value = true
       uni.showModal({
         title: "错误",
-        content: "请先扫箱号",
+        content: "箱号不存在",
         showCancel: false,
         confirmText: "好的",
         success: (result) => {
@@ -198,7 +229,7 @@ const checkTarget = () => {
     } else {
       const item = boxMap.value.get(targetBox.value)
       if (item) {
-        if (item.ibrNo !== result.value && item.skuId !== result.value) {
+        if (item.logisticNo !== result.value && item.skuId !== result.value) {
           showModal.value = true
           uni.showModal({
             title: "错误",
@@ -223,8 +254,8 @@ const checkTarget = () => {
           item.skuIdCheck = add(item.skuIdCheck ?? 0, 1)
         }
         // 和ibr匹配
-        if (item.ibrNo === result.value) {
-          item.ibrCheck = add(item.ibrCheck ?? 0, 1)
+        if (item.logisticNo === result.value) {
+          item.logisticCheck = add(item.logisticCheck ?? 0, 1)
           uni.showToast({
             title: `货代号：${result.value}`,
             icon: "success",
@@ -301,6 +332,7 @@ const handleError = () => {
 
   .easyinput {
     flex: 1;
+    margin-left: 5px;
   }
 
   .xianghao {
@@ -309,6 +341,7 @@ const handleError = () => {
 
   .calendar {
     flex: 1;
+    margin-left: 5px;
   }
 }
 .content {
@@ -320,7 +353,14 @@ const handleError = () => {
 
   .content-text {
     margin-left: 10rpx;
-    width: 80%;
+    font-size: 14px;
+    width: 70%;
+  }
+}
+
+.box-icon {
+  text {
+    line-height: 28px;
   }
 }
 

@@ -6,6 +6,13 @@
       class="item"
       @click="toWait(item.id)"
     >
+      <view class="item-image">
+        <image
+          mode="aspectFit"
+          :src="ProductImage"
+          class="image-content"
+        ></image>
+      </view>
       <text>{{ item.vendor }} - {{ item.productName }}</text>
       <uni-icons
         type="right"
@@ -32,6 +39,7 @@ import { BaseURL } from "@/utils/config"
 import { onLoad } from "@dcloudio/uni-app"
 import { isEmpty, isNil } from "ramda"
 import { ref } from "vue"
+import ProductImage from "@/static/product.png"
 
 const files = ref<any>(null)
 
@@ -125,14 +133,19 @@ onLoad(async () => {
 .item {
   width: 80%;
   background: #fff;
-  padding: 20rpx;
+  padding: 10rpx 20rpx;
   border: 1rpx solid rgba(33, 84, 118, 1);
   margin: 20rpx 0;
   color: rgba(33, 84, 118, 1);
-  font-size: 28rpx;
+  font-size: 38rpx;
+  font-weight: bold;
   display: flex;
   align-items: center;
   justify-content: space-between;
+}
+.image-content {
+  width: 100rpx;
+  height: 90rpx;
 }
 .divider {
   width: 100%; /* 与.item的宽度一致 */

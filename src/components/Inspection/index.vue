@@ -1,11 +1,15 @@
 <template>
-  <uni-card>
+  <uni-card padding="10px 10px 10px 0">
     <view class="item">
       <view class="item-icon" v-if="status === 'already'"
         ><uni-icons type="checkmarkempty" color="#2da641" size="20"></uni-icons
       ></view>
       <view class="item-image">
-        <image :src="ProductImage" class="image-content"></image>
+        <image
+          mode="aspectFit"
+          :src="ProductImage"
+          class="image-content"
+        ></image>
       </view>
       <view class="item-container">
         <view class="container-icon" v-if="status === 'wait'"
@@ -16,7 +20,8 @@
             <uni-icons
               custom-prefix="iconfont"
               type="icon-RectangleCopy2"
-              size="20"
+              class="inspection-icon"
+              size="28"
             ></uni-icons>
             <text class="content-text">{{ item.warehousePlat }}</text>
           </view>
@@ -24,7 +29,8 @@
             <uni-icons
               custom-prefix="iconfont"
               type="icon-RectangleCopy3"
-              size="20"
+              class="inspection-icon"
+              size="28"
             ></uni-icons>
             <text class="content-text"
               >{{ item.cartonNum }}箱/{{ item.quantity }}</text
@@ -36,7 +42,8 @@
             <uni-icons
               custom-prefix="iconfont"
               type="icon-RectangleCopy1"
-              size="20"
+              class="inspection-icon"
+              size="28"
             ></uni-icons>
             <text class="content-text">{{
               dayjs(item.deliveryDate).format("YYYY-MM-DD")
@@ -46,9 +53,12 @@
             <uni-icons
               custom-prefix="iconfont"
               type="icon-RectangleCopy"
-              size="20"
+              class="inspection-icon"
+              size="28"
             ></uni-icons>
-            <view class="content-text">{{ item.ibrNo }}</view>
+            <view class="content-text">{{
+              formattedIbrNo(item.ibrNo ?? "")
+            }}</view>
           </view>
         </view>
       </view>
@@ -69,6 +79,13 @@ interface Props {
 const props = defineProps<Props>()
 
 const { item, status } = props
+
+const formattedIbrNo = (ibrNo: string) => {
+  if (ibrNo.length <= 9) {
+    return ibrNo
+  }
+  return ibrNo.slice(0, 5) + "..." + ibrNo.slice(-4)
+}
 </script>
 
 <style lang="scss">
@@ -84,10 +101,10 @@ const { item, status } = props
   left: 10rpx;
 }
 .item-image {
-  flex: 1;
+  flex: 2;
 }
 .item-container {
-  flex: 3;
+  flex: 7;
   display: flex;
   justify-content: space-around;
   align-items: center;
@@ -106,10 +123,10 @@ const { item, status } = props
   align-items: start;
 }
 .first {
-  flex: 1;
+  flex: 2;
 }
 .second {
-  flex: 2;
+  flex: 3;
 }
 .content {
   display: flex;
@@ -118,8 +135,14 @@ const { item, status } = props
   word-break: break-all;
 }
 .content-text {
-  line-height: 30rpx;
+  font-size: 14px;
 }
+.inspection-icon {
+  text {
+    line-height: 28px;
+  }
+}
+
 .image-content {
   width: 130rpx;
   height: 120rpx;

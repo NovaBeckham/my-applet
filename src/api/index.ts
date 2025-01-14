@@ -6,15 +6,15 @@ interface ListResponse {
 }
 
 export interface Inspection {
-  cartonNum: number
-  createTime: number
-  deliveryDate: number
-  ibrNo: string
-  id: number
-  productId: number
-  quantity: number
-  status: number
-  warehousePlat: string
+  cartonNum?: number
+  createTime?: number
+  deliveryDate?: number
+  ibrNo?: string
+  id?: number
+  productId?: number
+  quantity?: number
+  status?: number
+  warehousePlat?: string
 }
 
 export interface ProductList {
