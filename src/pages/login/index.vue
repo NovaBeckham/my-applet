@@ -66,25 +66,39 @@ const parseCookies = (cookies: string[]) => {
 const onSubmit = async () => {
   if (loginForm.value) {
     await loginForm.value.validate()
-    uni
-      .request({
-        url: `${BaseURL}/rest/iniasc/user/login?mobile=${formData.value.mobile}&password=${formData.value.password}`,
-        method: "POST",
+    uni.showLoading({
+      title: "加载中",
+    })
+    const { data, cookies } = await uni.request({
+      url: `${BaseURL}/rest/iniasc/user/login?mobile=${formData.value.mobile}&password=${formData.value.password}`,
+      method: "POST",
+    })
+    uni.hideLoading()
+    if (isNil(data)) {
+      uni.showToast({
+        title: "用户名密码错误",
+        icon: "error",
       })
-      .then((res) => {
-        console.log("res", res.cookies)
-        if (!isEmpty(res.cookies)) {
-          const cookieMap = parseCookies(res.cookies)
-          if (cookieMap.UID && cookieMap.LT) {
-            uni.setStorageSync("UID", cookieMap.UID)
-            uni.setStorageSync("LT", cookieMap.LT)
-            uni.setStorageSync("mobile", formData.value.mobile)
-            uni.switchTab({
-              url: "/pages/index/index",
-            })
-          }
-        }
+      return
+    }
+    if ((data as any).code !== 200) {
+      uni.showToast({
+        title: "用户名密码错误",
+        icon: "error",
       })
+      return
+    }
+    if (!isEmpty(cookies)) {
+      const cookieMap = parseCookies(cookies)
+      if (cookieMap.UID && cookieMap.LT) {
+        uni.setStorageSync("UID", cookieMap.UID)
+        uni.setStorageSync("LT", cookieMap.LT)
+        uni.setStorageSync("mobile", formData.value.mobile)
+        uni.switchTab({
+          url: "/pages/index/index",
+        })
+      }
+    }
   }
 }
 

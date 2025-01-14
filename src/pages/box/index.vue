@@ -106,36 +106,35 @@ const isWait = computed(() => {
   return state.value.status === "wait"
 })
 
-onLoad((options?: QueryOptions) => {
+onLoad(async (options?: QueryOptions) => {
   if (options) {
     state.value = options
-    getCartonList(options.deliveryTaskId ?? "").then((res) => {
-      const { code, data } = res
-      if (code === 200 && !isNil(data)) {
-        const listMap: Map<string, BoxItem> = new Map()
-        listMap.set("6922266450365", {
-          cartonNo: "6922266450365",
-          skuId: "6900966577117",
-          ibrNo: "6973939344870",
+    uni.showLoading({
+      title: "加载中",
+    })
+    const { code, data } = await getCartonList(options.deliveryTaskId ?? "")
+    uni.hideLoading()
+    if (code === 200 && !isNil(data) && !isEmpty(data)) {
+      const listMap: Map<string, BoxItem> = new Map()
+      data.forEach((item) => {
+        listMap.set(item.cartonNo ?? "", {
+          ...item,
           cartonNoCheck: 0,
           skuIdCheck: 0,
           ibrCheck: 0,
         })
-        data.forEach((item) => {
-          listMap.set(item.cartonNo ?? "", {
-            ...item,
-            cartonNoCheck: 0,
-            skuIdCheck: 0,
-            ibrCheck: 0,
-          })
-        })
-        boxMap.value = listMap
-      }
-    })
+      })
+      boxMap.value = listMap
+    } else {
+      uni.showToast({
+        title: "数据为空",
+        icon: "error",
+      })
+    }
   }
 })
 
-const onFabClick = () => {
+const onFabClick = async () => {
   let cartonNo = ""
   boxMap.value.forEach((value, key) => {
     if (
@@ -155,15 +154,22 @@ const onFabClick = () => {
     })
     return
   }
-  boxCheckFinish(state.value.deliveryTaskId ?? "").then((res) => {
-    const { code } = res
-    if (code === 200) {
-      uni.showToast({
-        title: "验证成功",
-      })
-      uni.navigateBack()
-    }
+  uni.showLoading({
+    title: "加载中",
   })
+  const { code } = await boxCheckFinish(state.value.deliveryTaskId ?? "")
+  uni.hideLoading()
+  if (code === 200) {
+    uni.showToast({
+      title: "验证成功",
+    })
+    uni.navigateBack()
+  } else {
+    uni.showToast({
+      title: "验证失败",
+      icon: "error",
+    })
+  }
 }
 
 const checkTarget = () => {

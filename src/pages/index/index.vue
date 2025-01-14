@@ -7,7 +7,11 @@
       @click="toWait(item.id)"
     >
       <text>{{ item.vendor }} - {{ item.productName }}</text>
-      <uni-icons type="right" size="20" color="rgba(33, 84, 118, 1)"></uni-icons>
+      <uni-icons
+        type="right"
+        size="20"
+        color="rgba(33, 84, 118, 1)"
+      ></uni-icons>
     </view>
     <view class="divider"></view>
     <view>
@@ -40,11 +44,14 @@ const toWait = (productId: number) => {
   })
 }
 
-const fileSelect = (res: any) => {
+const fileSelect = async (res: any) => {
   const { tempFiles } = res
   const UID = uni.getStorageSync("UID")
   const LT = uni.getStorageSync("LT")
-  const result = uni.uploadFile({
+  uni.showLoading({
+    title: "加载中",
+  })
+  const { data } = await uni.uploadFile({
     url: `${BaseURL}/rest/iniasc/deliveryTask/importDeliveryTask`,
     header: {
       Cookie: `UID=${UID}; LT=${LT}`,
@@ -57,29 +64,53 @@ const fileSelect = (res: any) => {
     filePath: tempFiles[0].url,
     name: "file",
   })
-  console.log("result", result)
+  uni.hideLoading()
+  if (!isNil(data) && !isEmpty(data)) {
+    const result = JSON.parse(data)
+    if (result.code === 200) {
+      uni.showToast({
+        title: "上传成功",
+        icon: "success",
+      })
+    } else {
+      uni.showToast({
+        title: "上传失败",
+        icon: "error",
+      })
+    }
+  } else {
+    uni.showToast({
+      title: "上传失败",
+      icon: "error",
+    })
+  }
 }
 
-onLoad(() => {
+onLoad(async () => {
   const UID = uni.getStorageSync("UID")
-  const LT = uni.getStorageSync("LT")
   uni.removeStorageSync("productId")
   if (isNil(UID) || isEmpty(UID)) {
     uni.showToast({
       title: "请重新登录",
+      icon: "none",
     })
     uni.reLaunch({
       url: "/pages/login/index",
     })
   } else {
-    console.log("UID", UID)
-    console.log("LT", LT)
-    getProductList().then((res) => {
-      const { code, data } = res
-      if (code === 200 && !isNil(data)) {
-        list.value = data
-      }
+    uni.showLoading({
+      title: "加载中",
     })
+    const { code, data } = await getProductList()
+    uni.hideLoading()
+    if (code === 200 && !isNil(data) && !isEmpty(data)) {
+      list.value = data
+    } else {
+      uni.showToast({
+        title: "数据为空",
+        icon: "none",
+      })
+    }
   }
 })
 </script>
