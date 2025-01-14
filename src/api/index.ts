@@ -1,4 +1,4 @@
-import { DeliveryResponse } from "@/interface"
+import type { DeliveryResponse } from "@/interface"
 import { request } from "@/utils/request"
 
 interface ListResponse {

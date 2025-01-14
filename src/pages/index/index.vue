@@ -6,11 +6,15 @@
       class="item"
       @click="toWait(item.id)"
     >
-      {{ item.vendor }} - {{ item.productName }}
+      <text>{{ item.vendor }} - {{ item.productName }}</text>
+      <uni-icons type="right" size="20" color="rgba(33, 84, 118, 1)"></uni-icons>
     </view>
+    <view class="divider"></view>
     <view>
       <uni-file-picker
         ref="files"
+        :limit="1"
+        title="上传文件"
         file-mediatype="all"
         @select="fileSelect"
       ></uni-file-picker>
@@ -19,7 +23,7 @@
 </template>
 
 <script setup lang="ts">
-import { getProductList, ProductList } from "@/api"
+import { getProductList, type ProductList } from "@/api"
 import { BaseURL } from "@/utils/config"
 import { onLoad } from "@dcloudio/uni-app"
 import { isEmpty, isNil } from "ramda"
@@ -95,5 +99,14 @@ onLoad(() => {
   margin: 20rpx 0;
   color: rgba(33, 84, 118, 1);
   font-size: 28rpx;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.divider {
+  width: 100%; /* 与.item的宽度一致 */
+  height: 1rpx; /* 分割线高度，可根据需要调整 */
+  background-color: rgba(33, 84, 118, 0.5); /* 分割线颜色，可根据需要调整 */
+  margin: 20rpx 0; /* 与.item的间距一致 */
 }
 </style>
