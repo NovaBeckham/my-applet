@@ -9,77 +9,86 @@
       class="camera"
     />
   </view>
-  <view v-for="item in boxMap" :key="item[0]">
-    <uni-card padding="0">
-      <view class="item-container">
-        <view class="item-content">
-          <view
-            :class="`content huodai ${
-              item[1].logisticCheck ? 'isCheck' : 'noCheck'
-            }`"
-          >
-            <uni-icons
-              custom-prefix="iconfont"
-              type="icon-huodai"
-              class="box-icon"
-              size="28"
-            ></uni-icons>
-            <text class="content-text">{{ item[1].logisticNo }}</text>
+  <scroll-view
+    class="list-container"
+    :scroll-y="true"
+    :scroll-into-view="scrollIntoViewId"
+    :scroll-with-animation="true"
+  >
+    <view v-for="item in boxMap" :key="item[0]" :id="item[0]">
+      <uni-card padding="0">
+        <view class="item-container">
+          <view class="item-content">
+            <view
+              :class="`content huodai ${
+                item[1].logisticCheck ? 'isCheck' : 'noCheck'
+              }`"
+            >
+              <uni-icons
+                custom-prefix="iconfont"
+                type="icon-huodai"
+                class="box-icon"
+                size="28"
+              ></uni-icons>
+              <text class="content-text">{{ item[1].logisticNo }}</text>
+            </view>
+            <view
+              :class="`content sku ${
+                item[1].skuIdCheck ? 'isCheck' : 'noCheck'
+              }`"
+            >
+              <uni-icons
+                custom-prefix="iconfont"
+                type="icon-sku"
+                class="box-icon"
+                size="28"
+              ></uni-icons>
+              <text class="content-text">{{ item[1].skuId }}</text>
+            </view>
+            <view class="content easyinput">
+              <uni-tag :text="`x ${item[1].skuIdCheck}`" type="primary" />
+            </view>
           </view>
-          <view
-            :class="`content sku ${item[1].skuIdCheck ? 'isCheck' : 'noCheck'}`"
-          >
-            <uni-icons
-              custom-prefix="iconfont"
-              type="icon-sku"
-              class="box-icon"
-              size="28"
-            ></uni-icons>
-            <text class="content-text">{{ item[1].skuId }}</text>
-          </view>
-          <view class="content easyinput">
-            <uni-tag :text="`x ${item[1].skuIdCheck}`" type="primary" />
+          <view class="item-content">
+            <view
+              :class="`content xianghao ${
+                item[1].cartonNoCheck ? 'isCheck' : 'noCheck'
+              }`"
+            >
+              <uni-icons
+                custom-prefix="iconfont"
+                type="icon-xianghao"
+                class="box-icon"
+                size="28"
+              ></uni-icons>
+              <text class="content-text">{{ item[0] }}</text>
+            </view>
+            <view class="content calendar" v-if="isWait">
+              <uni-icons
+                type="calendar-filled"
+                size="26"
+                color="#2da641"
+                v-if="
+                  item[1].cartonNoCheck > 0 &&
+                  item[1].logisticCheck > 0 &&
+                  item[1].skuIdCheck > 0
+                "
+              ></uni-icons
+              ><uni-icons type="calendar" size="26" v-else></uni-icons>
+            </view>
           </view>
         </view>
-        <view class="item-content">
-          <view
-            :class="`content xianghao ${
-              item[1].cartonNoCheck ? 'isCheck' : 'noCheck'
-            }`"
-          >
-            <uni-icons
-              custom-prefix="iconfont"
-              type="icon-xianghao"
-              class="box-icon"
-              size="28"
-            ></uni-icons>
-            <text class="content-text">{{ item[0] }}</text>
-          </view>
-          <view class="content calendar" v-if="isWait">
-            <uni-icons
-              type="calendar-filled"
-              size="26"
-              color="#2da641"
-              v-if="
-                item[1].cartonNoCheck > 0 &&
-                item[1].logisticCheck > 0 &&
-                item[1].skuIdCheck > 0
-              "
-            ></uni-icons
-            ><uni-icons type="calendar" size="26" v-else></uni-icons>
-          </view>
-        </view>
-      </view>
-    </uni-card>
-  </view>
+      </uni-card>
+    </view>
+  </scroll-view>
   <view v-if="isWait">
     <button class="fab" @click="onFabClick">完成</button>
   </view>
 </template>
 
 <script setup lang="ts">
-import { onHide, onLoad, onUnload } from "@dcloudio/uni-app"
-import { computed, ref } from "vue"
+import { onLoad, onUnload } from "@dcloudio/uni-app"
+import { computed, nextTick, ref } from "vue"
 import { add, clone, isEmpty, isNil } from "ramda"
 import { boxCheckFinish, getCartonList, type CartonRecord } from "@/api"
 
@@ -101,6 +110,8 @@ const boxMap = ref<Map<string, BoxItem>>(new Map())
 const targetBox = ref("")
 const result = ref("")
 const showModal = ref(false)
+/** 用于记录需要滚动到的元素的id */
+const scrollIntoViewId = ref("")
 let scanTimeoutId: null | number = null
 
 /**
@@ -153,7 +164,6 @@ onLoad(async (options?: QueryOptions) => {
 })
 
 onUnload(() => {
-  console.log('onHide')
   if (!isAllCheck.value) {
     const list: BoxItem[] = []
     boxMap.value.forEach((value) => {
@@ -212,6 +222,9 @@ const checkTarget = () => {
       icon: "success",
     })
     boxItem.cartonNoCheck = add(boxItem.cartonNoCheck ?? 0, 1)
+    nextTick(() => {
+      scrollIntoViewId.value = result.value
+    })
   } else {
     if (isEmpty(targetBox.value)) {
       showModal.value = true
@@ -315,6 +328,10 @@ const handleError = () => {
   height: 96%;
 }
 
+.list-container {
+  height: 720rpx;
+}
+
 .item-container {
   display: flex;
   flex-direction: column;
@@ -327,7 +344,7 @@ const handleError = () => {
   }
 
   .sku {
-    flex: 2;
+    flex: 3;
   }
 
   .easyinput {
@@ -336,7 +353,7 @@ const handleError = () => {
   }
 
   .xianghao {
-    flex: 5;
+    flex: 6;
   }
 
   .calendar {
@@ -354,7 +371,7 @@ const handleError = () => {
   .content-text {
     margin-left: 10rpx;
     font-size: 14px;
-    width: 70%;
+    width: 80%;
   }
 }
 
